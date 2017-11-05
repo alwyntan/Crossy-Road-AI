@@ -7,14 +7,10 @@ public class AutoMoveObjects : MonoBehaviour {
     public Settings.XDIRECTION startDirection;
 
     private float moveSpeed;
-    private Settings settings;
-
 
 	// Use this for initialization
 	void Start () {
-        settings = FindObjectOfType<Settings>().GetComponent<Settings>();
 
-        moveSpeed = settings.MoveSpeed;
 	}
 	
 	// Update is called once per frame
@@ -33,4 +29,9 @@ public class AutoMoveObjects : MonoBehaviour {
             Destroy(gameObject);
         }
 	}
+
+    public void setSpeed(float speed)
+    {
+        moveSpeed = speed;
+    }
 }

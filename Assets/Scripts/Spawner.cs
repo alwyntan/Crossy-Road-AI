@@ -11,10 +11,12 @@ public class Spawner : MonoBehaviour {
     private float maxSpawnInterval;
 
     private float interval = 0;
+    private Settings settings;
+    private float moveSpeed = 0;
 
     // Use this for initialization
     void Start () {
-        var settings = FindObjectOfType<Settings>().GetComponent<Settings>();
+        settings = FindObjectOfType<Settings>().GetComponent<Settings>();
         spawnXoffset = settings.SpawnXoffset;
         minSpawnInterval = settings.MinSpawnInterval;
         maxSpawnInterval = settings.MaxSpawnInterval;
@@ -55,19 +57,18 @@ public class Spawner : MonoBehaviour {
                 spawnObj = settings.LeftLogPrefab;
             }
         }
-
-        var spawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
-        interval = spawnInterval;
+        
+        interval = settings.GetSpawnInterval();
+        moveSpeed = settings.GetMoveSpeed();
     }
 	
 	// Update is called once per frame
 	void Update () {
 		if (interval <= 0)
         {
-            var spawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
-            interval = spawnInterval;
-
-            Instantiate(spawnObj, transform.position, Quaternion.identity);
+            interval = settings.GetSpawnInterval();
+            GameObject obj = Instantiate(spawnObj, transform.position, Quaternion.identity);
+            obj.GetComponent<AutoMoveObjects>().setSpeed(moveSpeed);
         }
 
         interval -= Time.deltaTime;

@@ -9,6 +9,7 @@ public class PlayerControl : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
 	}
 	
 	// Update is called once per frame
@@ -35,30 +36,30 @@ public class PlayerControl : MonoBehaviour {
         else if (vert < 0)
             MoveBackward();
 
-        if (log)
-        {
-            var pos = transform.position;
-            pos.x = log.transform.position.x + onLogOffset;
-            transform.position = pos;
-        }
-	}
+    }
+
+    // 0.5 away from log center per 1 extra block of log
+    // Here log sizes are always 2
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Log"))
         {
-            log = collision.gameObject;
             var pos = transform.position;
-            float x = Mathf.Round(pos.x);
-            if (pos.x > x)
-                onLogOffset = 0.5f;
-            else
-                onLogOffset = -0.5f;
+            pos.x = transform.position.x < collision.transform.position.x ? collision.transform.position.x - 0.5f : collision.transform.position.x + 0.5f;
+            transform.position = pos;
+            transform.parent = collision.transform;
         }
+    }
 
-        if (collision.gameObject.CompareTag("Grass") || collision.gameObject.CompareTag("Road"))
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Log"))
         {
-            log = null;
+            var pos = transform.position;
+            pos.x = Mathf.Round(pos.x);
+            transform.position = pos;
+            transform.parent = null;
         }
     }
 

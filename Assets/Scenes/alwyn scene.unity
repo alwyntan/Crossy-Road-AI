@@ -151,6 +151,11 @@ Prefab:
       propertyPath: m_Name
       value: Water (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 65217051547680056, guid: c90f4ffd90b5a354aa6c0b3cde40bccb,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: c90f4ffd90b5a354aa6c0b3cde40bccb, type: 2}
   m_IsPrefabParent: 0
@@ -353,17 +358,17 @@ Prefab:
     - target: {fileID: 65182817538235394, guid: 5ec7c58b8c921b34b8cebcac85154fc4,
         type: 2}
       propertyPath: m_Size.x
-      value: 0.8
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 65182817538235394, guid: 5ec7c58b8c921b34b8cebcac85154fc4,
         type: 2}
       propertyPath: m_Size.y
-      value: 0.8
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 65182817538235394, guid: 5ec7c58b8c921b34b8cebcac85154fc4,
         type: 2}
       propertyPath: m_Size.z
-      value: 0.8
+      value: 0.95
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5ec7c58b8c921b34b8cebcac85154fc4, type: 2}
@@ -722,6 +727,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 65217051547680056, guid: c90f4ffd90b5a354aa6c0b3cde40bccb,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: c90f4ffd90b5a354aa6c0b3cde40bccb, type: 2}
   m_IsPrefabParent: 0
@@ -844,10 +854,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99c827865dd8b794ea045b7e31e22f99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSpeed: 4
   SpawnXoffset: 15
   MinSpawnInterval: 1.5
   MaxSpawnInterval: 3
+  MinMoveSpeed: 3
+  MaxMoveSpeed: 6
   RightCarPrefab: {fileID: 1282255211466542, guid: f0df5a6f26f55d44e88744d6d57c6fd3,
     type: 2}
   LeftCarPrefab: {fileID: 1108322685330174, guid: 65682cbfd07b14b4aaea9fdb135951f5,
@@ -982,6 +993,11 @@ Prefab:
     - target: {fileID: 1902264050554530, guid: c90f4ffd90b5a354aa6c0b3cde40bccb, type: 2}
       propertyPath: m_Name
       value: Water (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 65217051547680056, guid: c90f4ffd90b5a354aa6c0b3cde40bccb,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: c90f4ffd90b5a354aa6c0b3cde40bccb, type: 2}
