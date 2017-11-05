@@ -3,7 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Car
+  - Log
+  - CarSpawner
+  - LogSpawner
+  - Road
+  - Grass
   layers:
   - Default
   - TransparentFX
