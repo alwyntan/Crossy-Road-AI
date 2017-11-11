@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33608829052553862}
   - component: {fileID: 65093088682446306}
   - component: {fileID: 23595431529617284}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Road
   m_TagString: Road
   m_Icon: {fileID: 0}
@@ -38,7 +38,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4389388249108458}
   - component: {fileID: 114282601354775196}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Spawner
   m_TagString: CarSpawner
   m_Icon: {fileID: 0}

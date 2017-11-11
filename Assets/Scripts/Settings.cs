@@ -9,11 +9,19 @@ public class Settings : MonoBehaviour {
     public float MaxSpawnInterval;
     public float MinMoveSpeed;
     public float MaxMoveSpeed;
+    public int MaxTreesPerRow;
+    public float HorizBounds;
+
+    public LayerMask BlocksLayer;
 
     public GameObject RightCarPrefab;
     public GameObject LeftCarPrefab;
     public GameObject RightLogPrefab;
     public GameObject LeftLogPrefab;
+    public GameObject TreePrefab;
+    public GameObject GrassPrefab;
+    public GameObject RoadPrefab;
+    public GameObject WaterPrefab;
 
     public enum XDIRECTION { left, right };
 

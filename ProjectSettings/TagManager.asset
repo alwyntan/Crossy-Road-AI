@@ -10,6 +10,8 @@ TagManager:
   - LogSpawner
   - Road
   - Grass
+  - Water
+  - Tree
   layers:
   - Default
   - TransparentFX
@@ -19,8 +21,8 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
+  - Blocks
+  - IgnoreCollision
   - 
   - 
   - 

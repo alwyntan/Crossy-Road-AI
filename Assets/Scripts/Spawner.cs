@@ -40,22 +40,15 @@ public class Spawner : MonoBehaviour {
         if (gameObject.CompareTag("CarSpawner"))
         {
             if (toDirection == Settings.XDIRECTION.left)
-            {
                 spawnObj = settings.RightCarPrefab;
-            } else
-            {
+            else
                 spawnObj = settings.LeftCarPrefab;
-            }
         } else if (gameObject.CompareTag("LogSpawner"))
         {
             if (toDirection == Settings.XDIRECTION.left)
-            {
                 spawnObj = settings.RightLogPrefab;
-            }
             else
-            {
                 spawnObj = settings.LeftLogPrefab;
-            }
         }
         
         interval = settings.GetSpawnInterval();
