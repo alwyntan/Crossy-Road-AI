@@ -1,24 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CustomDefinitions;
 
 public class AutoMoveObjects : MonoBehaviour {
     
-    public Settings.XDIRECTION startDirection;
+    public XDIRECTION startDirection;
 
-    private float moveSpeed;
-
-	// Use this for initialization
-	void Start () {
-
-	}
+    private float moveSpeed; //move speed is block moved per second
+    public float velocity;
 	
 	// Update is called once per frame
 	void Update () {
-        if (startDirection == Settings.XDIRECTION.left)
+        if (startDirection == XDIRECTION.left)
         {
             transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
-        } else if (startDirection == Settings.XDIRECTION.right)
+        } else if (startDirection == XDIRECTION.right)
         {
             transform.Translate(Vector3.left * moveSpeed * Time.deltaTime);
         }
@@ -33,5 +30,9 @@ public class AutoMoveObjects : MonoBehaviour {
     public void setSpeed(float speed)
     {
         moveSpeed = speed;
+        if (startDirection == XDIRECTION.left)
+            velocity = speed;
+        else if (startDirection == XDIRECTION.right)
+            velocity = -speed;
     }
 }

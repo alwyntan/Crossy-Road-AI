@@ -12,6 +12,9 @@ TagManager:
   - Grass
   - Water
   - Tree
+  - TestCar
+  - TestLog
+  - TestPlayer
   layers:
   - Default
   - TransparentFX

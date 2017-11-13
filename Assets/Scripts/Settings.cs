@@ -5,10 +5,14 @@ using UnityEngine;
 public class Settings : MonoBehaviour {
     
     public float SpawnXoffset;
-    public float MinSpawnInterval;
-    public float MaxSpawnInterval;
-    public float MinMoveSpeed;
-    public float MaxMoveSpeed;
+    public float MinCarSpawnInterval;
+    public float MaxCarSpawnInterval;
+    public float MinLogSpawnInterval;
+    public float MaxLogSpawnInterval;
+    public float MinCarMoveSpeed;
+    public float MaxCarMoveSpeed;
+    public float MinLogMoveSpeed;
+    public float MaxLogMoveSpeed;
     public int MaxTreesPerRow;
     public float HorizBounds;
 
@@ -23,8 +27,6 @@ public class Settings : MonoBehaviour {
     public GameObject RoadPrefab;
     public GameObject WaterPrefab;
 
-    public enum XDIRECTION { left, right };
-
     // Use this for initialization
     void Start () {
 		
@@ -35,14 +37,25 @@ public class Settings : MonoBehaviour {
 		
 	}
 
-    public float GetSpawnInterval()
+    public float GetCarSpawnInterval()
     {
         // randomly returns
-        return Random.Range(MinSpawnInterval, MaxSpawnInterval);
+        return Random.Range(MinCarSpawnInterval, MaxCarSpawnInterval);
     }
 
-    public float GetMoveSpeed()
+    public float GetLogSpawnInterval()
     {
-        return Random.Range(MinMoveSpeed, MaxMoveSpeed);
+        // randomly returns
+        return Random.Range(MinLogSpawnInterval, MaxLogSpawnInterval);
+    }
+
+    public float GetCarMoveSpeed()
+    {
+        return Random.Range(MinCarMoveSpeed, MaxCarMoveSpeed);
+    }
+
+    public float GetLogMoveSpeed()
+    {
+        return Random.Range(MinLogMoveSpeed, MaxLogMoveSpeed);
     }
 }

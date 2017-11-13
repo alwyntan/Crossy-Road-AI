@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using CustomDefinitions; // custom for like the enum "Direction"
 
 public class PlayerControl : MonoBehaviour {
 
@@ -8,74 +10,102 @@ public class PlayerControl : MonoBehaviour {
     private float onLogOffset;
 
     private Settings settings;
-    private enum Direction {LEFT, RIGHT, FRONT, BACK };
+    
 
 	// Use this for initialization
 	void Start () {
         settings = FindObjectOfType<Settings>().GetComponent<Settings>();
     }
-	
-	// Update is called once per frame
-	void Update () {
-        var vert = 0;
-        var horiz = 0;
 
-        if (Input.GetKeyDown(KeyCode.W))
-            vert = 1;
-        else if (Input.GetKeyDown(KeyCode.S))
-            vert = -1;
-        else if (Input.GetKeyDown(KeyCode.A))
-            horiz = -1;
-        else if (Input.GetKeyDown(KeyCode.D))
-            horiz = 1;
+    // Update is called once per frame
+    void Update() {
+        if (!GetComponent<AIScript>().AIEnabled)
+        {
+            // player move if ai is not enabled
+            var vert = 0;
+            var horiz = 0;
 
-        if (horiz > 0 && canMove(Direction.RIGHT))
-            MoveRight();
-        else if (horiz < 0 && canMove(Direction.LEFT))
-            MoveLeft();
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+                vert = 1;
+            else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+                vert = -1;
+            else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+                horiz = -1;
+            else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+                horiz = 1;
 
-        if (vert > 0 && canMove(Direction.FRONT))
-            MoveForward();
-        else if (vert < 0 && canMove(Direction.BACK))
-            MoveBackward();
+            if (horiz > 0 && canMove(Direction.RIGHT))
+                MoveRight();
+            else if (horiz < 0 && canMove(Direction.LEFT))
+                MoveLeft();
+
+            if (vert > 0 && canMove(Direction.FRONT))
+                MoveForward();
+            else if (vert < 0 && canMove(Direction.BACK))
+                MoveBackward();
+        }
     }
 
-    private bool canMove(Direction dir)
+    private bool canMove(Direction dir, Transform customTransform = null)
     {
-        var pos = transform.position;
+        Vector3 pos = new Vector3();
+
+        if (!customTransform)
+            pos = transform.position;
+        else
+            pos = customTransform.position;
+
         switch (dir)
         {
             case Direction.LEFT:
                 pos.x -= 1;
-                if (pos.x <= -settings.HorizBounds || isInvalid(pos))
+                if (pos.x <= -settings.HorizBounds || isInvalid(pos, customTransform))
                     return false;
                 else return true;
             case Direction.RIGHT:
                 pos.x += 1;
-                if (pos.x >= settings.HorizBounds || isInvalid(pos))
+                if (pos.x >= settings.HorizBounds || isInvalid(pos, customTransform))
                     return false;
                 else return true;
             case Direction.FRONT:
                 pos.z += 1;
-                if (isInvalid(pos))
+                if (isInvalid(pos, customTransform))
                     return false;
                 else return true;
             case Direction.BACK:
                 pos.z -= 1;
-                if (isInvalid(pos))
+                if (isInvalid(pos, customTransform))
                     return false;
                 else return true;
+            case Direction.STAY:
+                return true;
         }
         return false;
     }
 
-    private bool isInvalid(Vector3 pos)
+    private bool isInvalid(Vector3 pos, Transform customTransform)
     {
         Collider[] overlaps = Physics.OverlapBox(pos, new Vector3(0.2f, 0.2f, 0.2f), Quaternion.identity, settings.BlocksLayer);
-        if (overlaps.Length > 0)
-            return true;
-        if (pos.z < GetComponent<PlayerScore>().GetScore() - 5)
-            return true;
+
+        if (customTransform == null)
+        {
+            if (overlaps.Length > 0)
+                return true;
+            if (pos.z < GetComponent<PlayerScore>().GetScore() - 5)
+                return true;
+        } else
+        {
+            if (overlaps.Length > 0)
+            {
+                foreach (var o in overlaps)
+                {
+                    if (o.CompareTag("TestCar") || o.CompareTag("Tree"))
+                        return true;
+                }
+            }
+            if (pos.z < GetComponent<PlayerScore>().GetScore() - 5)
+                return true;
+        }
 
         return false;
     }
@@ -120,24 +150,54 @@ public class PlayerControl : MonoBehaviour {
         Destroy(this.gameObject);
     }
 
+
     // for the AI to control movement
-    public void MoveForward()
+    public void MoveForward(Transform customTransform = null)
     {
-        transform.Translate(Vector3.forward);
+        if (customTransform == null)
+            transform.Translate(Vector3.forward);
+        else
+            customTransform.Translate(Vector3.forward);
     }
 
-    public void MoveBackward()
+    public void MoveBackward(Transform customTransform = null)
     {
-        transform.Translate(Vector3.back);
+        if (customTransform == null)
+            transform.Translate(Vector3.back);
+        else
+            customTransform.Translate(Vector3.back);
     }
 
-    public void MoveRight()
+    public void MoveRight(Transform customTransform = null)
     {
-        transform.Translate(Vector3.right);
+        if (customTransform == null)
+            transform.Translate(Vector3.right);
+        else
+            customTransform.Translate(Vector3.right);
     }
 
-    public void MoveLeft()
+    public void MoveLeft(Transform customTransform = null)
     {
-        transform.Translate(Vector3.left);
+        if (customTransform == null)
+            transform.Translate(Vector3.left);
+        else
+            customTransform.Translate(Vector3.left);
+    }
+
+
+    // FUNCTIONS FOR THE AI
+    /// <summary>
+    /// Gets available moves for the custom player being passed in
+    /// </summary>
+    /// <returns></returns>
+    public List<Direction> GetAvailableMoves(Collider playerCollider)
+    {
+        List<Direction> availableDirs = new List<Direction>();
+        foreach (Direction dir in Enum.GetValues(typeof(Direction)))
+        {
+            if (canMove(dir, playerCollider.transform))
+                availableDirs.Add(dir);
+        }
+        return availableDirs;
     }
 }
