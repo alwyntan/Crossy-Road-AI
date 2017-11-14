@@ -89,18 +89,17 @@ public class GameState : MonoBehaviour
         {
             if (o.transform.CompareTag(tag))
             {
-                if (tag == "Car")
-                {
-                    var testCarObj = Instantiate(testCar, o.transform.position, Quaternion.identity);
-                    testCarObj.GetComponent<TestData>().velocity = o.transform.GetComponent<AutoMoveObjects>().velocity;
-                    col.Add(testCarObj.GetComponent<BoxCollider>());
-                }
-                else if (tag == "Log")
-                {
-                    var testLogObj = Instantiate(testLog, o.transform.position, Quaternion.identity);
-                    testLogObj.GetComponent<TestData>().velocity = o.transform.GetComponent<AutoMoveObjects>().velocity;
-                    col.Add(testLogObj.GetComponent<BoxCollider>());
-                }
+				if (tag == "Car") {
+					var testCarObj = Instantiate (testCar, o.transform.position, Quaternion.identity);
+					testCarObj.GetComponent<TestData> ().velocity = o.transform.GetComponent<AutoMoveObjects> ().velocity;
+					col.Add (testCarObj.GetComponent<BoxCollider> ());
+				} else if (tag == "Log") {
+					var testLogObj = Instantiate (testLog, o.transform.position, Quaternion.identity);
+					testLogObj.GetComponent<TestData> ().velocity = o.transform.GetComponent<AutoMoveObjects> ().velocity;
+					col.Add (testLogObj.GetComponent<BoxCollider> ());
+				} else {
+					col.Add (o);
+				}
             }
         }
         return col;
@@ -164,4 +163,8 @@ public class GameState : MonoBehaviour
         }
         return false;
     }
+
+	public int GetScore(Collider playerCollider) {
+		return (int)playerCollider.transform.position.z;
+	}
 }
