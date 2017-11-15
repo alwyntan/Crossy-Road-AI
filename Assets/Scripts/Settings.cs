@@ -27,6 +27,9 @@ public class Settings : MonoBehaviour {
     public GameObject RoadPrefab;
     public GameObject WaterPrefab;
 
+    private bool isAI = false;
+    private bool autoMove = true;
+
     // Use this for initialization
     void Start () {
 		
@@ -57,5 +60,21 @@ public class Settings : MonoBehaviour {
     public float GetLogMoveSpeed()
     {
         return Random.Range(MinLogMoveSpeed, MaxLogMoveSpeed);
+    }
+
+    public bool getIsAI() {
+        return isAI;
+    }
+
+    public void setIsAI(bool set) {
+        isAI = set;
+    }
+
+    public bool getAutoMove() {
+        return autoMove;
+    }
+
+    public void setAutoMove(bool set) {
+        autoMove = set;
     }
 }

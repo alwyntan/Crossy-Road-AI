@@ -17,6 +17,8 @@ public class AIScript : MonoBehaviour {
     public bool right = false;
     public bool getBestMove = false;
 
+    public int depthSetting;
+
     private float lookRadius = 2;
     
     private Collider playerCollider = new Collider();
@@ -25,11 +27,13 @@ public class AIScript : MonoBehaviour {
 
 	public float AIMoveInterval = 0.1f;
 	private float currInterval;
+	private Settings settings;
 
     // Use this for initialization
-    void Start () {
-		currInterval = AIMoveInterval;
-	}
+    void Start() {
+    	currInterval = AIMoveInterval;
+        settings = GameObject.FindObjectOfType<Settings>().GetComponent<Settings>();
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -99,11 +103,11 @@ public class AIScript : MonoBehaviour {
     {
         // find best move using expectimax?
         // initialization for the colliders
+        settings.setAutoMove(false);
+        settings.setIsAI(true);
         playerCollider = gameState.GetPlayer();
         carColliders = gameState.GetCarColliders(playerCollider, lookRadius);
         logColliders = gameState.GetLogColliders(playerCollider, lookRadius);
-
-        // code start
 
 		Vector3 prevPlayerPos = playerCollider.transform.position;
 		List<Vector3> prevCarPositions = new List<Vector3>();
@@ -116,9 +120,7 @@ public class AIScript : MonoBehaviour {
 		foreach (var log in logColliders) {
 			prevLogPositions.Add (log.transform.position);
 		}
-
-		//recurse
-
+			
 		//backtrack
 		playerCollider.transform.position = prevPlayerPos;
 		for (int i = 0; i < carColliders.Count; i++) {
@@ -128,35 +130,44 @@ public class AIScript : MonoBehaviour {
 			logColliders [i].transform.position = prevLogPositions [i];
 		}
 					
-		Debug.Log("HI");
-		var depth = 3;
-		var bestMove = recurseFunction(0, depth);
-		Debug.Log (bestMove[1]);
+		var depth = depthSetting;
+		var bestMove = recurseFunction(0, depth, prevPlayerPos);
+		Debug.Log ("XxX" + bestMove[1]);
 		var move = (Direction)System.Enum.Parse (typeof(Direction), bestMove [1]);
 		movePlayer (move);
-        // code end
-
+	
+		settings.setAutoMove(true);
+        settings.setIsAI(false);
         clearStates(); // after finding a best move, clear all states and refind another
     }
 
 
-	List<string> recurseFunction(int agentIndex,int depth){
+	List<string> recurseFunction(int agentIndex, int depth, Vector3 currentPosition) {
 		if (gameState.isPlayerDead(playerCollider,logColliders,carColliders))
 		{
 			//GetScore Need to do a negative score!
-			int currScore = gameState.GetScore(playerCollider);
-			currScore -= 1000;	
-			var score = currScore + "";
+			//int currScore = gameState.GetScore(playerCollider);
+			//currScore -= 1000;	
+			//var score = currScore + "";
 			List<string> returnList = new List<string>();
-			returnList.Add(score);
+			returnList.Add(-999999 + "");
 			returnList.Add("");	
 			return returnList;
 		};
 		if (depth == 0) {
 			//GetScore
 			var score = gameState.GetScore(playerCollider) + "";
+			List<Direction> actions = findAvailableMoves();
+			Debug.Log ("fuck " + score);
 			List<string> returnList = new List<string>();
-			returnList.Add(score);
+			if (actions.Count == 0) {
+				Debug.Log("supreme");
+				returnList.Add(-1000 + "");
+			} else if (int.Parse(score) < (int)currentPosition.z) {
+				returnList.Add((int)currentPosition.z + "");
+			} else {
+				returnList.Add(score);
+			}
 			returnList.Add("");	
 			return returnList;
 		}
@@ -166,29 +177,50 @@ public class AIScript : MonoBehaviour {
 			List<List<string>> varminmax = new List<List<string>>();
 			Vector3 currPlayerPos = playerCollider.transform.position;
 
+//			foreach (Direction dir in actions) 
+//			{
+//				Debug.Log (dir.ToString () + " depth: " + depth);
+//			}
+
 			foreach(Direction dir in actions)
 			{
 				movePlayer(dir, true);
 				List<string> value = new List<string> ();
-				value.Add (recurseFunction (agentIndex + 1, depth) [0]);
+				var oldScore = gameState.GetScore(playerCollider);
+				value.Add (recurseFunction (agentIndex + 1, depth, currentPosition) [0]);
+				/*if (dir == Direction.STAY) { 
+					value [0] = (int.Parse (value [0]) - 1).ToString ();
+				} else if (dir == Direction.BACK) {
+					value [0] = (int.Parse (value [0]) + 2).ToString ();
+				}*/
+				Debug.Log (dir.ToString () + " score: " + value[0] + " depth: " + depth);
 				value.Add(dir.ToString());
 				varminmax.Add(value);
 				playerCollider.transform.position = currPlayerPos;
 			}
 			List<string> highestValue = new List<string>();
-			highestValue = varminmax [0];
+			highestValue = varminmax [0]; //
+			List<List<string>> allHighest = new List<List<string>>();
 			//SET TO HIGHEST BEFORE FINDING MAX
 			foreach (var value in varminmax) 
 			{
 				//change string!
-				Debug.Log(value[0]);
-				Debug.Log(highestValue[0]);
-				if (int.Parse(value[0]) > int.Parse(highestValue[0])) 
-				{
+				//Debug.Log(value[0]);
+				//Debug.Log(highestValue[0]);
+				int currScore = int.Parse(value[0]);
+				int highScore = int.Parse (highestValue [0]);
+
+				if (currScore > highScore) {
 					highestValue = value;
+					allHighest.Clear ();
+					allHighest.Add (value);
+				} else if (currScore == highScore) {
+					allHighest.Add (value);
 				}
-			}	
-			return highestValue;
+			}
+			Debug.Log (int.Parse(highestValue[0]) + "yyy" + highestValue[1]);
+			int index = Random.Range (0, allHighest.Count);
+			return allHighest[index];
 		} else
 		{
 //			List<Collider> currcarColliders = gameState.GetCarColliders(playerCollider, lookRadius); 
@@ -218,9 +250,9 @@ public class AIScript : MonoBehaviour {
 			}
 
 			//recurse
-			recurseFunction (0, depth - 1);
+			recurseFunction (0, depth - 1, currentPosition);
 			List<string> value = new List<string> ();
-			value.Add (recurseFunction (agentIndex + 1, depth - 1) [0]);
+			value.Add (recurseFunction (agentIndex + 1, depth - 1, currentPosition) [0]);
 			value.Add("ENEMIES_MOVE");
 
 			//backtrack
@@ -231,12 +263,6 @@ public class AIScript : MonoBehaviour {
 				logColliders [i].transform.position = prevLogPositions [i];
 			}
 			return value;
-
-
-
-
-
-
 		}
 	}	
 

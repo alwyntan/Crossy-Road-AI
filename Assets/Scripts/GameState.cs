@@ -10,6 +10,8 @@ public class GameState : MonoBehaviour
     public GameObject testPlayer;
     public GameObject testLog;
     public GameObject testCar;
+
+    public int maxScore = 0;
     //private GameObject player;
     // states only give the forward 2 and backward 2
 
@@ -71,7 +73,7 @@ public class GameState : MonoBehaviour
                 {
                     var pos = col.transform.position;
                     var velocity = col.transform.GetComponent<TestData>().velocity;
-                    pos.x += velocity * 0.1f; // assume that each move takes 0.1f
+                    pos.x += velocity * .1f; // assume that each move takes 0.1f
                     col.transform.position = pos;
                 }
             }
@@ -152,7 +154,7 @@ public class GameState : MonoBehaviour
                 if (playerCollider.bounds.Intersects(log.bounds))
                 {
                     // if on log and didnt fall out, return false
-                    if (playerCollider.transform.position.x > -5.22f && playerCollider.transform.position.x < 5.22f)
+                    if (playerCollider.transform.position.x > -5.7f && playerCollider.transform.position.x < 5.7f)
                     {
                         return false;
                     }
@@ -165,6 +167,12 @@ public class GameState : MonoBehaviour
     }
 
 	public int GetScore(Collider playerCollider) {
-		return (int)playerCollider.transform.position.z;
+        /*if ((int)playerCollider.transform.position.z > maxScore) {
+            maxScore = (int)playerCollider.transform.position.z;
+        } else {
+            maxScore -= 1;
+        }*/
+        //return maxScore;
+        return (int)playerCollider.transform.position.z;
 	}
 }

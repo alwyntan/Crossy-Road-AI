@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657856, g: 0.49641234, b: 0.57481724, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -407,6 +407,8 @@ MonoBehaviour:
   left: 0
   right: 0
   getBestMove: 0
+  depthSetting: 2
+  AIMoveInterval: 0.1
 --- !u!1001 &673305433
 Prefab:
   m_ObjectHideFlags: 0
@@ -687,7 +689,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1517487336}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -384, y: 383, z: 0}
+  m_LocalPosition: {x: -330, y: 160, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1718101561}
@@ -819,7 +821,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1718101557}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 484, y: 433, z: 0}
+  m_LocalPosition: {x: 430, y: 210, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1517487337}
@@ -861,6 +863,7 @@ MonoBehaviour:
   testPlayer: {fileID: 1082976550196302, guid: 39132de80db9dd746bf36e2eb5e9d9e1, type: 2}
   testLog: {fileID: 1636016695933048, guid: f056d8b2372a73642887c3e4aacc6c55, type: 2}
   testCar: {fileID: 1254924361511900, guid: 3d754c29c497e5f4780e4717a3adc719, type: 2}
+  maxScore: 0
 --- !u!4 &1901600799
 Transform:
   m_ObjectHideFlags: 0
