@@ -181,8 +181,11 @@ public class AIScript : MonoBehaviour {
 
 			Debug.Log ("fuck " + score);
 			List<string> returnList = new List<string>();
+			Debug.Log("fuck fuck " + currentPosition.x);
 			if (actions.Count == 0) {
 				//Debug.Log("supreme");
+				returnList.Add(-1000 + "");
+			} else if ((int)playerCollider.transform.position.x == 4 || (int)playerCollider.transform.position.x == -4) {
 				returnList.Add(-1000 + "");
 			} else if (int.Parse(score) < (int)currentPosition.z) {
 				returnList.Add((int)currentPosition.z + "");
@@ -198,24 +201,13 @@ public class AIScript : MonoBehaviour {
 			List<List<string>> varminmax = new List<List<string>>();
 			Vector3 currPlayerPos = playerCollider.transform.position;
 
-//			foreach (Direction dir in actions) 
-//			{
-//				Debug.Log (dir.ToString () + " depth: " + depth);
-//			}
-
 			foreach(Direction dir in actions)
 			{
 				movePlayer(dir, true);
 				List<string> value = new List<string> ();
 				var oldScore = gameState.GetScore(playerCollider);
 				value.Add (recurseFunction (agentIndex + 1, depth, currentPosition) [0]);
-				/*if (dir == Direction.STAY) { 
-					value [0] = (int.Parse (value [0]) - 1).ToString ();
-				} else if (dir == Direction.BACK) {
-					value [0] = (int.Parse (value [0]) + 2).ToString ();
-				}*/
-				//Debug.Log (dir.ToString () + " score: " + value[0] + " depth: " + depth);
-				value.Add(dir.ToString());
+				value.Add (dir.ToString());
 				varminmax.Add(value);
 				playerCollider.transform.position = currPlayerPos;
 			}
@@ -244,21 +236,6 @@ public class AIScript : MonoBehaviour {
 			return allHighest[index];
 		} else
 		{
-//			List<Collider> currcarColliders = gameState.GetCarColliders(playerCollider, lookRadius); 
-//			List<Collider> currlogColliders = gameState.GetLogColliders(playerCollider, lookRadius);
-//
-//			gameState.SetNextState (carColliders);
-//			gameState.SetNextState (logColliders);
-//			recurseFunction (0, depth - 1);
-//			List<string> value = new List<string> ();
-//			value.Add (recurseFunction (agentIndex + 1, depth - 1) [0]);
-//			value.Add("ENEMIES_MOVE");
-//
-//			carColliders = currcarColliders;
-//			logColliders = currlogColliders;	
-
-
-
 			List<Vector3> prevCarPositions = new List<Vector3>();
 			List<Vector3> prevLogPositions = new List<Vector3>();
 
@@ -270,10 +247,12 @@ public class AIScript : MonoBehaviour {
 				prevLogPositions.Add (log.transform.position);
 			}
 
+
+			gameState.SetNextState (carColliders);
+			gameState.SetNextState (logColliders);
 			//recurse
-			recurseFunction (0, depth - 1, currentPosition);
 			List<string> value = new List<string> ();
-			value.Add (recurseFunction (agentIndex + 1, depth - 1, currentPosition) [0]);
+			value.Add (recurseFunction (0, depth - 1, currentPosition) [0]);
 			value.Add("ENEMIES_MOVE");
 
 			//backtrack
