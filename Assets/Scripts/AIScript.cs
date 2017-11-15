@@ -39,11 +39,15 @@ public class AIScript : MonoBehaviour {
 	void Update () {
         if (AIEnabled)
         {
-			if (currInterval < 0) {
-				findBestMove ();
-				currInterval = AIMoveInterval;
-			}
-			currInterval -= Time.deltaTime;
+            //settings.setAutoMove(false);
+            //settings.setIsAI(true);
+
+            //if (currInterval < 0)
+            //{
+            //    findBestMove();
+            //    currInterval = AIMoveInterval;
+            //}
+            //currInterval -= Time.deltaTime;
 
             if (init)
             {
@@ -96,6 +100,10 @@ public class AIScript : MonoBehaviour {
 				getBestMove = false;
                 findBestMove();
             }
+        } else
+        {
+            settings.setAutoMove(true);
+            settings.setIsAI(false);
         }
 	}
 
@@ -103,8 +111,6 @@ public class AIScript : MonoBehaviour {
     {
         // find best move using expectimax?
         // initialization for the colliders
-        settings.setAutoMove(false);
-        settings.setIsAI(true);
         playerCollider = gameState.GetPlayer();
         carColliders = gameState.GetCarColliders(playerCollider, lookRadius);
         logColliders = gameState.GetLogColliders(playerCollider, lookRadius);
@@ -129,26 +135,40 @@ public class AIScript : MonoBehaviour {
 		for (int i = 0; i < logColliders.Count; i++) {
 			logColliders [i].transform.position = prevLogPositions [i];
 		}
-					
+        Debug.Log("SEPERATION");			
 		var depth = depthSetting;
 		var bestMove = recurseFunction(0, depth, prevPlayerPos);
-		Debug.Log ("XxX" + bestMove[1]);
+        Debug.Log("NICK IS A PIECE OF SHIT");
+        Debug.Log(bestMove);
+		Debug.Log ("GAGHHHHHHH" + bestMove[1]);
 		var move = (Direction)System.Enum.Parse (typeof(Direction), bestMove [1]);
 		movePlayer (move);
-	
-		settings.setAutoMove(true);
-        settings.setIsAI(false);
+
+        manualMoveAllObjects();
+
         clearStates(); // after finding a best move, clear all states and refind another
+    }
+
+    private void manualMoveAllObjects()
+    {
+        var logs = GameObject.FindGameObjectsWithTag("Log");
+        var cars = GameObject.FindGameObjectsWithTag("Car");
+
+        foreach (var log in logs)
+            log.GetComponent<AutoMoveObjects>().ManualMove(AIMoveInterval);
+        foreach (var car in cars)
+            car.GetComponent<AutoMoveObjects>().ManualMove(AIMoveInterval);
     }
 
 
 	List<string> recurseFunction(int agentIndex, int depth, Vector3 currentPosition) {
 		if (gameState.isPlayerDead(playerCollider,logColliders,carColliders))
 		{
-			//GetScore Need to do a negative score!
-			//int currScore = gameState.GetScore(playerCollider);
-			//currScore -= 1000;	
-			//var score = currScore + "";
+            //GetScore Need to do a negative score!
+            //int currScore = gameState.GetScore(playerCollider);
+            //currScore -= 1000;	
+            //var score = currScore + "";
+            Debug.Log("WE ARE GOING TO DIE");
 			List<string> returnList = new List<string>();
 			returnList.Add(-999999 + "");
 			returnList.Add("");	
@@ -158,10 +178,11 @@ public class AIScript : MonoBehaviour {
 			//GetScore
 			var score = gameState.GetScore(playerCollider) + "";
 			List<Direction> actions = findAvailableMoves();
+
 			Debug.Log ("fuck " + score);
 			List<string> returnList = new List<string>();
 			if (actions.Count == 0) {
-				Debug.Log("supreme");
+				//Debug.Log("supreme");
 				returnList.Add(-1000 + "");
 			} else if (int.Parse(score) < (int)currentPosition.z) {
 				returnList.Add((int)currentPosition.z + "");
@@ -193,7 +214,7 @@ public class AIScript : MonoBehaviour {
 				} else if (dir == Direction.BACK) {
 					value [0] = (int.Parse (value [0]) + 2).ToString ();
 				}*/
-				Debug.Log (dir.ToString () + " score: " + value[0] + " depth: " + depth);
+				//Debug.Log (dir.ToString () + " score: " + value[0] + " depth: " + depth);
 				value.Add(dir.ToString());
 				varminmax.Add(value);
 				playerCollider.transform.position = currPlayerPos;
@@ -218,7 +239,7 @@ public class AIScript : MonoBehaviour {
 					allHighest.Add (value);
 				}
 			}
-			Debug.Log (int.Parse(highestValue[0]) + "yyy" + highestValue[1]);
+			//Debug.Log (int.Parse(highestValue[0]) + "yyy" + highestValue[1]);
 			int index = Random.Range (0, allHighest.Count);
 			return allHighest[index];
 		} else
