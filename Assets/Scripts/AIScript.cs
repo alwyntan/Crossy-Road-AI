@@ -39,15 +39,15 @@ public class AIScript : MonoBehaviour {
 	void Update () {
         if (AIEnabled)
         {
-            //settings.setAutoMove(false);
-            //settings.setIsAI(true);
+            settings.setAutoMove(false);
+            settings.setIsAI(true);
 
-            //if (currInterval < 0)
-            //{
-            //    findBestMove();
-            //    currInterval = AIMoveInterval;
-            //}
-            //currInterval -= Time.deltaTime;
+            if (currInterval < 0)
+            {
+                findBestMove();
+                currInterval = AIMoveInterval;
+            }
+            currInterval -= Time.deltaTime;
 
             if (init)
             {
