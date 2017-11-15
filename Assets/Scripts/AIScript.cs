@@ -135,12 +135,8 @@ public class AIScript : MonoBehaviour {
 		for (int i = 0; i < logColliders.Count; i++) {
 			logColliders [i].transform.position = prevLogPositions [i];
 		}
-        Debug.Log("SEPERATION");			
 		var depth = depthSetting;
 		var bestMove = recurseFunction(0, depth, prevPlayerPos);
-        Debug.Log("NICK IS A PIECE OF SHIT");
-        Debug.Log(bestMove);
-		Debug.Log ("GAGHHHHHHH" + bestMove[1]);
 		var move = (Direction)System.Enum.Parse (typeof(Direction), bestMove [1]);
 		movePlayer (move);
 
@@ -165,10 +161,6 @@ public class AIScript : MonoBehaviour {
 		if (gameState.isPlayerDead(playerCollider,logColliders,carColliders))
 		{
             //GetScore Need to do a negative score!
-            //int currScore = gameState.GetScore(playerCollider);
-            //currScore -= 1000;	
-            //var score = currScore + "";
-            Debug.Log("WE ARE GOING TO DIE");
 			List<string> returnList = new List<string>();
 			returnList.Add(-999999 + "");
 			returnList.Add("");	
@@ -179,11 +171,10 @@ public class AIScript : MonoBehaviour {
 			var score = gameState.GetScore(playerCollider) + "";
 			List<Direction> actions = findAvailableMoves();
 
-			Debug.Log ("fuck " + score);
 			List<string> returnList = new List<string>();
-			Debug.Log("fuck fuck " + currentPosition.x);
+//			Debug.Log("fuck fuck " + currentPosition.x);
 			if (actions.Count == 0) {
-				//Debug.Log("supreme");
+				Debug.Log("supreme");
 				returnList.Add(-1000 + "");
 			} else if ((int)playerCollider.transform.position.x == 4 || (int)playerCollider.transform.position.x == -4) {
 				returnList.Add(-1000 + "");
@@ -205,6 +196,7 @@ public class AIScript : MonoBehaviour {
 			{
 				movePlayer(dir, true);
 				List<string> value = new List<string> ();
+				//This can be removed!
 				var oldScore = gameState.GetScore(playerCollider);
 				value.Add (recurseFunction (agentIndex + 1, depth, currentPosition) [0]);
 				value.Add (dir.ToString());
@@ -217,11 +209,8 @@ public class AIScript : MonoBehaviour {
 			//SET TO HIGHEST BEFORE FINDING MAX
 			foreach (var value in varminmax) 
 			{
-				//change string!
-				//Debug.Log(value[0]);
-				//Debug.Log(highestValue[0]);
 				int currScore = int.Parse(value[0]);
-				int highScore = int.Parse (highestValue [0]);
+				int highScore = int.Parse(highestValue[0]);
 
 				if (currScore > highScore) {
 					highestValue = value;
@@ -231,11 +220,9 @@ public class AIScript : MonoBehaviour {
 					allHighest.Add (value);
 				}
 			}
-			//Debug.Log (int.Parse(highestValue[0]) + "yyy" + highestValue[1]);
 			int index = Random.Range (0, allHighest.Count);
 			return allHighest[index];
-		} else
-		{
+		} else {
 			List<Vector3> prevCarPositions = new List<Vector3>();
 			List<Vector3> prevLogPositions = new List<Vector3>();
 
