@@ -135,12 +135,12 @@ public class AIScript : MonoBehaviour {
 		for (int i = 0; i < logColliders.Count; i++) {
 			logColliders [i].transform.position = prevLogPositions [i];
 		}
-        Debug.Log("SEPERATION");			
+        //Debug.Log("SEPERATION");			
 		var depth = depthSetting;
 		var bestMove = recurseFunction(0, depth, prevPlayerPos);
-        Debug.Log("NICK IS A PIECE OF SHIT");
-        Debug.Log(bestMove);
-		Debug.Log ("GAGHHHHHHH" + bestMove[1]);
+        //Debug.Log("NICK IS A PIECE OF SHIT");
+        //Debug.Log(bestMove);
+		//Debug.Log ("GAGHHHHHHH" + bestMove[1]);
 		var move = (Direction)System.Enum.Parse (typeof(Direction), bestMove [1]);
 		movePlayer (move);
 
@@ -168,7 +168,7 @@ public class AIScript : MonoBehaviour {
             //int currScore = gameState.GetScore(playerCollider);
             //currScore -= 1000;	
             //var score = currScore + "";
-            Debug.Log("WE ARE GOING TO DIE");
+            //Debug.Log("WE ARE GOING TO DIE");
 			List<string> returnList = new List<string>();
 			returnList.Add(-999999 + "");
 			returnList.Add("");	
@@ -179,18 +179,23 @@ public class AIScript : MonoBehaviour {
 			var score = gameState.GetScore(playerCollider) + "";
 			List<Direction> actions = findAvailableMoves();
 
-			Debug.Log ("fuck " + score);
+			//Debug.Log ("fuck " + score);
 			List<string> returnList = new List<string>();
-			Debug.Log("fuck fuck " + currentPosition.x);
+			//Debug.Log("fuck fuck " + currentPosition.x);
 			if (actions.Count == 0) {
 				//Debug.Log("supreme");
 				returnList.Add(-1000 + "");
-			} else if ((int)playerCollider.transform.position.x == 4 || (int)playerCollider.transform.position.x == -4) {
+			} /*else if ((int)playerCollider.transform.position.x == 4 || (int)playerCollider.transform.position.x == -4) {
 				returnList.Add(-1000 + "");
-			} else if (int.Parse(score) < (int)currentPosition.z) {
+			}*/ else if (int.Parse(score) < (int)currentPosition.z) {
 				returnList.Add((int)currentPosition.z + "");
 			} else {
-				returnList.Add(score);
+				//returnList.Add(score);
+				if (((int)playerCollider.transform.position.x) == 0) {
+					returnList.Add(score);
+				} else {
+					returnList.Add((int)(int.Parse(score) * (1 / UnityEngine.Mathf.Abs((int)playerCollider.transform.position.x))) + "");
+				}
 			}
 			returnList.Add("");	
 			return returnList;
