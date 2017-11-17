@@ -44,6 +44,7 @@ public class AIScript : MonoBehaviour {
 
             if (currInterval < 0)
             {
+				Debug.Log("Beauty is in the eye of the beholder");
                 findBestMove();
                 currInterval = AIMoveInterval;
             }
@@ -149,11 +150,21 @@ public class AIScript : MonoBehaviour {
     {
         var logs = GameObject.FindGameObjectsWithTag("Log");
         var cars = GameObject.FindGameObjectsWithTag("Car");
-
+		System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
+		StopWatch.Start();
         foreach (var log in logs)
             log.GetComponent<AutoMoveObjects>().ManualMove(AIMoveInterval);
         foreach (var car in cars)
             car.GetComponent<AutoMoveObjects>().ManualMove(AIMoveInterval);
+		StopWatch.Stop();
+		// Get the elapsed time as a TimeSpan value.
+		var ts = StopWatch.Elapsed;
+		// Format and display the TimeSpan value.
+//		string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+//			ts.Hours, ts.Minutes, ts.Seconds,
+//			ts.Milliseconds / 10);
+		Debug.Log("RunTime " + ts);
+		Debug.Log("KORE'");
     }
 
 
@@ -162,7 +173,7 @@ public class AIScript : MonoBehaviour {
 		{
             //GetScore Need to do a negative score!
 			List<string> returnList = new List<string>();
-			returnList.Add(-999999 + "");
+			returnList.Add(-99999 + "");
 			returnList.Add("");	
 			return returnList;
 		};
@@ -177,6 +188,7 @@ public class AIScript : MonoBehaviour {
 				Debug.Log("supreme");
 				returnList.Add(-1000 + "");
 			} else if ((int)playerCollider.transform.position.x == 4 || (int)playerCollider.transform.position.x == -4) {
+				Debug.Log("ends off");
 				returnList.Add(-1000 + "");
 			} else if (int.Parse(score) < (int)currentPosition.z) {
 				returnList.Add((int)currentPosition.z + "");
