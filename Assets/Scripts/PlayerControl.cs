@@ -150,6 +150,34 @@ public class PlayerControl : MonoBehaviour {
         Destroy(this.gameObject);
     }
 
+    public void clip(Transform customTransform = null)
+    {
+        if (customTransform != null)
+        {
+            var pos = customTransform.position;
+            pos.y = 0.5f;
+            var overlaps = Physics.OverlapBox(pos, new Vector3(0.4f, .8f, 0.4f), Quaternion.identity); //extend a bit out of horiz bounds to catch colliders outside
+            foreach (var o in overlaps)
+            {
+                if (o.transform.CompareTag("TestLog"))
+                {
+                    var p = customTransform.position;
+                    p.x = customTransform.position.x < o.transform.position.x ? o.transform.position.x - 0.5f : o.transform.position.x + 0.5f;
+                    customTransform.position = p;
+                    customTransform.parent = o.transform;
+                    break;
+                } else if (o.transform.CompareTag("Grass") || o.transform.CompareTag("Road"))
+                {
+                    var p = customTransform.position;
+                    p.x = Mathf.Round(p.x);
+                    customTransform.position = p;
+                    customTransform.parent = null;
+                }
+
+            }
+        }
+    }
+
 
     // for the AI to control movement
     public void MoveForward(Transform customTransform = null)
@@ -158,6 +186,8 @@ public class PlayerControl : MonoBehaviour {
             transform.Translate(Vector3.forward);
         else
             customTransform.Translate(Vector3.forward);
+
+        clip(customTransform);
     }
 
     public void MoveBackward(Transform customTransform = null)
@@ -166,6 +196,8 @@ public class PlayerControl : MonoBehaviour {
             transform.Translate(Vector3.back);
         else
             customTransform.Translate(Vector3.back);
+
+        clip(customTransform);
     }
 
     public void MoveRight(Transform customTransform = null)
@@ -174,6 +206,8 @@ public class PlayerControl : MonoBehaviour {
             transform.Translate(Vector3.right);
         else
             customTransform.Translate(Vector3.right);
+
+        clip(customTransform);
     }
 
     public void MoveLeft(Transform customTransform = null)
@@ -182,6 +216,8 @@ public class PlayerControl : MonoBehaviour {
             transform.Translate(Vector3.left);
         else
             customTransform.Translate(Vector3.left);
+
+        clip(customTransform);
     }
 
 
