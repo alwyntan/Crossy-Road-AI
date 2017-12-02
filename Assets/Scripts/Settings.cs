@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Settings : MonoBehaviour {
     
+    public bool AutoRestart;
     public float SpawnXoffset;
     public float MinCarSpawnInterval;
     public float MaxCarSpawnInterval;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using CustomDefinitions; // custom for like the enum "Direction"
+using UnityEngine.SceneManagement;
 
 public class PlayerControl : MonoBehaviour {
 
@@ -148,6 +149,12 @@ public class PlayerControl : MonoBehaviour {
     {
         FindObjectOfType<Camera>().transform.parent = null;
         Destroy(this.gameObject);
+
+        if (this.settings.AutoRestart)
+        {
+            // auto restarts the game
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
     }
 
     public void clip(Transform customTransform = null)

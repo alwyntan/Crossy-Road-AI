@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 11
-  m_GIWorkflowMode: 0
+  m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -86,7 +86,8 @@ LightmapSettings:
     m_PVRFilteringAtrousColorSigma: 1
     m_PVRFilteringAtrousNormalSigma: 1
     m_PVRFilteringAtrousPositionSigma: 1
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000002, guid: 86119141605abc24c9afed6977fc3dca,
+    type: 2}
   m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
@@ -394,8 +395,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameState: {fileID: 1901600798}
-  AIEnabled: 1
-  move: 1
+  AIEnabled: 0
+  move: 0
   init: 0
   setNextState: 0
   clear: 0
@@ -404,7 +405,7 @@ MonoBehaviour:
   left: 0
   right: 0
   getBestMove: 0
-  depthSetting: 4
+  depthSetting: 3
   AIMoveInterval: 0.01
 --- !u!1001 &673305433
 Prefab:
@@ -589,6 +590,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99c827865dd8b794ea045b7e31e22f99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AutoRestart: 1
   SpawnXoffset: 15
   MinCarSpawnInterval: 3
   MaxCarSpawnInterval: 4
