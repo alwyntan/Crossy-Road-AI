@@ -126,7 +126,7 @@ public class PlayerControl : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        if ((other.gameObject.CompareTag("Car") || other.gameObject.CompareTag("Water")) && GetComponent<Collider>().bounds.Intersects(other.bounds))
+        if ((other.gameObject.CompareTag("Car") || other.gameObject.CompareTag("Water") || other.gameObject.CompareTag("Death")) && GetComponent<Collider>().bounds.Intersects(other.bounds))
         {
             Debug.Log(other);
             playerDie();
@@ -175,6 +175,30 @@ public class PlayerControl : MonoBehaviour {
                 }
 
             }
+        } else
+        {
+            var pos = transform.position;
+            pos.y = 0.5f;
+            var overlaps = Physics.OverlapBox(pos, new Vector3(0.4f, .8f, 0.4f), Quaternion.identity); //extend a bit out of horiz bounds to catch colliders outside
+            foreach (var o in overlaps)
+            {
+                if (o.transform.CompareTag("Log"))
+                {
+                    var p = transform.position;
+                    p.x = transform.position.x < o.transform.position.x ? o.transform.position.x - 0.5f : o.transform.position.x + 0.5f;
+                    transform.position = p;
+                    transform.parent = o.transform;
+                    break;
+                }
+                else if (o.transform.CompareTag("Grass") || o.transform.CompareTag("Road"))
+                {
+                    var p = transform.position;
+                    p.x = Mathf.Round(p.x);
+                    transform.position = p;
+                    transform.parent = null;
+                }
+
+            }
         }
     }
 
@@ -183,41 +207,45 @@ public class PlayerControl : MonoBehaviour {
     public void MoveForward(Transform customTransform = null)
     {
         if (customTransform == null)
+        {
             transform.Translate(Vector3.forward);
+            clip();
+        }
         else
             customTransform.Translate(Vector3.forward);
-
-        clip(customTransform);
     }
 
     public void MoveBackward(Transform customTransform = null)
     {
         if (customTransform == null)
+        {
             transform.Translate(Vector3.back);
+            clip();
+        }
         else
             customTransform.Translate(Vector3.back);
-
-        clip(customTransform);
     }
 
     public void MoveRight(Transform customTransform = null)
     {
         if (customTransform == null)
+        {
             transform.Translate(Vector3.right);
+            clip();
+        }
         else
             customTransform.Translate(Vector3.right);
-
-        clip(customTransform);
     }
 
     public void MoveLeft(Transform customTransform = null)
     {
         if (customTransform == null)
+        {
             transform.Translate(Vector3.left);
+            clip();
+        }
         else
             customTransform.Translate(Vector3.left);
-
-        clip(customTransform);
     }
 
 

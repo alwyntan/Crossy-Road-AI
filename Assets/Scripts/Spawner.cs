@@ -80,6 +80,12 @@ public class Spawner : MonoBehaviour {
             obj.GetComponent<AutoMoveObjects>().setSpeed(moveSpeed);
         }
 
-        interval -= Time.deltaTime;
+        if (settings.getAutoMove())
+            interval -= Time.deltaTime;
 	}
+
+    public void manualUpdate(float i)
+    {
+        interval -= i;
+    }
 }

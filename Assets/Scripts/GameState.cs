@@ -64,7 +64,7 @@ public class GameState : MonoBehaviour
     /// </summary>
     /// <param name="carColliders"></param>
     /// <returns></returns>
-    public void SetNextState(List<Collider> cols)
+    public void SetNextState(List<Collider> cols, float currInterval)
     {
         if (cols != null)
             if (cols.Count > 0)
@@ -73,7 +73,7 @@ public class GameState : MonoBehaviour
                 {
                     var pos = col.transform.position;
                     var velocity = col.transform.GetComponent<TestData>().velocity;
-                    pos.x += velocity * .1f; // assume that each move takes 0.1f
+                    pos.x += velocity * currInterval; // assume that each move takes 0.1f
                     col.transform.position = pos;
                 }
             }
@@ -107,6 +107,21 @@ public class GameState : MonoBehaviour
         return col;
     }
 
+    private bool isCollidedWithDeath(Collider playerCollider)
+    {
+        var pos = playerCollider.transform.position;
+        pos.y = 0.5f;
+        var overlaps = Physics.OverlapBox(pos, new Vector3(0.4f, .8f, 0.4f), Quaternion.identity); //extend a bit out of horiz bounds to catch colliders outside
+        foreach (var o in overlaps)
+        {
+            if (o.gameObject.CompareTag("Death"))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// <summary>
     /// Call this only the first time to get the player location!!!!
     /// </summary>
@@ -131,12 +146,18 @@ public class GameState : MonoBehaviour
             }
         }
 
-        if (isPlayerOnWaterOrFellOut(playerCollider, logColliders))
+        if (isCollidedWithDeath(playerCollider))
         {
             return true;
         }
 
-        return false;
+        if (isPlayerOnWaterOrFellOut(playerCollider, logColliders))
+        {
+            return true;
+        } else
+        {
+            return false;
+        }
     }
 
     /// <summary>
@@ -162,8 +183,10 @@ public class GameState : MonoBehaviour
             }
             // otherwise is gonna be dropped in water
             return true;
+        } else
+        {
+            return false;
         }
-        return false;
     }
 
 	public int GetScore(Collider playerCollider) {

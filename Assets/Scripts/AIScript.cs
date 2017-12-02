@@ -30,6 +30,8 @@ public class AIScript : MonoBehaviour {
 	private float currInterval;
 	private Settings settings;
 
+    private bool moved = true;
+
     // Use this for initialization
     void Start() {
     	currInterval = AIMoveInterval;
@@ -45,9 +47,9 @@ public class AIScript : MonoBehaviour {
 
             if (move)
             {
-                if (currInterval < 0)
+                if (currInterval < 0 && moved)
                 {
-                    Debug.Log("Beauty is in the eye of the beholder");
+                    moved = false;
                     findBestMove();
                     currInterval = AIMoveInterval;
                 }
@@ -68,8 +70,8 @@ public class AIScript : MonoBehaviour {
             if (setNextState)
             {
                 setNextState = false;
-                gameState.SetNextState(carColliders);
-                gameState.SetNextState(logColliders);
+                gameState.SetNextState(carColliders, AIMoveInterval);
+                gameState.SetNextState(logColliders, AIMoveInterval);
             }
 
             if (clear)
@@ -123,7 +125,7 @@ public class AIScript : MonoBehaviour {
         logColliders = gameState.GetLogColliders(playerCollider, lookRadius);
 
         // clip if on log
-        GetComponent<PlayerControl>().clip(playerCollider.transform);
+        //GetComponent<PlayerControl>().clip(playerCollider.transform);
 
 		//Vector3 prevPlayerPos = playerCollider.transform.position;
 		//List<Vector3> prevCarPositions = new List<Vector3>();
@@ -146,38 +148,47 @@ public class AIScript : MonoBehaviour {
 		//	logColliders [i].transform.position = prevLogPositions [i];
 		//}
 		var depth = depthSetting;
-		var bestMove = recurseFunction(0, depth, playerCollider.transform.position);
+		var bestMove = recurseFunction(0, depth, playerCollider.transform.position,true);
 		var move = (Direction)System.Enum.Parse (typeof(Direction), bestMove [1]);
 		movePlayer (move);
+        GetComponent<PlayerControl>().clip();
 
         manualMoveAllObjects();
 
         clearStates(); // after finding a best move, clear all states and refind another
+
+        moved = true;
     }
 
     private void manualMoveAllObjects()
     {
         var logs = GameObject.FindGameObjectsWithTag("Log");
         var cars = GameObject.FindGameObjectsWithTag("Car");
-		//System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
-		//StopWatch.Start();
+        var logSpawners = GameObject.FindGameObjectsWithTag("LogSpawner");
+        var carSpawners = GameObject.FindGameObjectsWithTag("CarSpawner");
+        //System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
+        //StopWatch.Start();
         foreach (var log in logs)
             log.GetComponent<AutoMoveObjects>().ManualMove(AIMoveInterval);
         foreach (var car in cars)
             car.GetComponent<AutoMoveObjects>().ManualMove(AIMoveInterval);
-//		StopWatch.Stop();
-//		// Get the elapsed time as a TimeSpan value.
-//		var ts = StopWatch.Elapsed;
-//		// Format and display the TimeSpan value.
-////		string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-////			ts.Hours, ts.Minutes, ts.Seconds,
-////			ts.Milliseconds / 10);
-//		Debug.Log("RunTime " + ts);
-//		Debug.Log("KORE'");
+        foreach (var s in logSpawners)
+            s.GetComponent<Spawner>().manualUpdate(AIMoveInterval);
+        foreach (var s in carSpawners)
+            s.GetComponent<Spawner>().manualUpdate(AIMoveInterval);
+        //		StopWatch.Stop();
+        //		// Get the elapsed time as a TimeSpan value.
+        //		var ts = StopWatch.Elapsed;
+        //		// Format and display the TimeSpan value.
+        ////		string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+        ////			ts.Hours, ts.Minutes, ts.Seconds,
+        ////			ts.Milliseconds / 10);
+        //		Debug.Log("RunTime " + ts);
+        //		Debug.Log("KORE'");
     }
 
 
-	List<string> recurseFunction(int agentIndex, int depth, Vector3 currentPosition) {
+	List<string> recurseFunction(int agentIndex, int depth, Vector3 currentPosition,bool firstLayer) {
 		if (gameState.isPlayerDead(playerCollider,logColliders,carColliders))
 		{
             //GetScore Need to do a negative score!
@@ -186,7 +197,16 @@ public class AIScript : MonoBehaviour {
 			returnList.Add("");
 			return returnList;
 		};
-		if (depth == 0) {
+        GetComponent<PlayerControl>().clip(playerCollider.transform);
+        if (gameState.isPlayerDead(playerCollider, logColliders, carColliders))
+        {
+            //GetScore Need to do a negative score!
+            List<string> returnList = new List<string>();
+            returnList.Add(-99999 + "");
+            returnList.Add("");
+            return returnList;
+        };
+        if (depth == 0) {
 			//GetScore
 			var score = gameState.GetScore(playerCollider) + "";
 			List<Direction> actions = findAvailableMoves();
@@ -194,7 +214,7 @@ public class AIScript : MonoBehaviour {
 			List<string> returnList = new List<string>();
 //			Debug.Log("fuck fuck " + currentPosition.x);
 			if (actions.Count == 0) {
-				Debug.Log("supreme");
+				//Debug.Log("supreme");
 				returnList.Add(-1000 + "");
 			} /*else if ((int)playerCollider.transform.position.x == 4 || (int)playerCollider.transform.position.x == -4) {
 				returnList.Add(-1000 + "");
@@ -223,11 +243,10 @@ public class AIScript : MonoBehaviour {
 				List<string> value = new List<string> ();
 				//This can be removed!
 				var oldScore = gameState.GetScore(playerCollider);
-				value.Add (recurseFunction (agentIndex + 1, depth, currentPosition) [0]);
+				value.Add (recurseFunction (agentIndex + 1, depth, currentPosition,false) [0]);
 				value.Add (dir.ToString());
 				varminmax.Add(value);
 				playerCollider.transform.position = currPlayerPos;
-                GetComponent<PlayerControl>().clip(playerCollider.transform);
             }
 			List<string> highestValue = new List<string>();
 			highestValue = varminmax [0]; //
@@ -247,6 +266,7 @@ public class AIScript : MonoBehaviour {
 				}
 			}
 			int index = Random.Range (0, allHighest.Count);
+
 			return allHighest[index];
 		} else {
 			List<Vector3> prevCarPositions = new List<Vector3>();
@@ -261,11 +281,11 @@ public class AIScript : MonoBehaviour {
 			}
 
 
-			gameState.SetNextState (carColliders);
-			gameState.SetNextState (logColliders);
+			gameState.SetNextState (carColliders, AIMoveInterval);
+			gameState.SetNextState (logColliders, AIMoveInterval);
 			//recurse
 			List<string> value = new List<string> ();
-			value.Add (recurseFunction (0, depth - 1, currentPosition) [0]);
+			value.Add (recurseFunction (0, depth - 1, currentPosition,false) [0]);
 			value.Add("ENEMIES_MOVE");
 
 			//backtrack
@@ -275,7 +295,7 @@ public class AIScript : MonoBehaviour {
 			for (int i = 0; i < logColliders.Count; i++) {
 				logColliders [i].transform.position = prevLogPositions [i];
 			}
-            GetComponent<PlayerControl>().clip(playerCollider.transform);
+            //GetComponent<PlayerControl>().clip(playerCollider.transform);
             return value;
 		}
 	}
@@ -299,7 +319,6 @@ public class AIScript : MonoBehaviour {
 				GetComponent<PlayerControl>().MoveLeft(trans);
 				break;
 			default:
-                GetComponent<PlayerControl>().clip(playerCollider.transform);
                 break;
 		}
 	}

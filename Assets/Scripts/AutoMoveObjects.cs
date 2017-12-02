@@ -44,11 +44,11 @@ public class AutoMoveObjects : MonoBehaviour {
     {
         if (startDirection == XDIRECTION.left)
         {
-            transform.Translate(Vector3.right * moveSpeed * 0.1f);
+            transform.Translate(Vector3.right * moveSpeed * timeAmount);
         }
         else if (startDirection == XDIRECTION.right)
         {
-            transform.Translate(Vector3.left * moveSpeed * 0.1f);
+            transform.Translate(Vector3.left * moveSpeed * timeAmount);
         }
 
         // destroy when out
