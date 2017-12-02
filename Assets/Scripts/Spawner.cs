@@ -67,6 +67,11 @@ public class Spawner : MonoBehaviour {
             moveSpeed = settings.GetLogMoveSpeed();
         }
     }
+
+    public XDIRECTION getDirection()
+    {
+        return toDirection;
+    }
 	
 	// Update is called once per frame
 	void Update () {

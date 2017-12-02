@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CustomDefinitions;
 
 public class GameState : MonoBehaviour
 {
@@ -131,6 +132,67 @@ public class GameState : MonoBehaviour
         var player = GameObject.FindGameObjectWithTag("Player");
         GameObject testPlayerObj = Instantiate(testPlayer, player.transform.position, Quaternion.identity);
         return testPlayerObj.GetComponent<BoxCollider>();
+    }
+
+    // collides with actual cars and logs etc
+    public List<int> getPlayerStatusInRealWorld(Collider playerCollider)
+    {
+        var pos = playerCollider.transform.position;
+        pos.y = 0.5f;
+        // 1: safe is 0: unsafe: 1
+        // 2: grass is 0, road is 1, water is 2
+        // 3: moving left is -1, no movement is 0, moving right is 1
+        var list = new List<int>();
+
+        var collided = Physics.OverlapBox(pos, new Vector3(0.4f, 0.8f, 0.4f), Quaternion.identity);
+        int safetyStatus = 0;
+        int floorStatus = 0;
+        int moveStatus = 0;
+        bool hasLog = false;
+        foreach (var col in collided)
+        {
+            Debug.Log(col.tag);
+            if (col.CompareTag("Car") || col.CompareTag("Tree") || col.CompareTag("Death"))
+            {
+                safetyStatus = 1;
+            }
+            if (col.CompareTag("Log"))
+            {
+                safetyStatus = 0;
+                hasLog = true;
+            }
+            if (col.CompareTag("Water"))
+            {
+                safetyStatus = (hasLog) ? 0 : 1;
+                floorStatus = 2;
+                var dir = col.GetComponentInChildren<Spawner>().getDirection();
+                if (dir == XDIRECTION.left)
+                    moveStatus = -1;
+                else
+                    moveStatus = 1;
+            }
+            if (col.CompareTag("Grass"))
+            {
+                floorStatus = 0;
+            }  
+            if (col.CompareTag("Road"))
+            {
+                floorStatus = 1;
+                var dir = col.GetComponentInChildren<Spawner>().getDirection();
+                if (dir == XDIRECTION.left)
+                    moveStatus = -1;
+                else
+                    moveStatus = 1;
+            }
+        }
+
+        //Debug.Log("floor" + floorStatus);
+
+        list.Add(safetyStatus);
+        list.Add(floorStatus);
+        list.Add(moveStatus);
+
+        return list;
     }
 
     /// <summary>

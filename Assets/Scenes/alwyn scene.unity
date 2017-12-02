@@ -395,7 +395,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameState: {fileID: 1901600798}
-  AIEnabled: 1
+  AIEnabled: 0
   AI_type: 0
   depthSetting: 3
   AIMoveInterval: 0.01

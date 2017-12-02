@@ -19,6 +19,8 @@ public class AIScript : MonoBehaviour {
 
     private GameTreeAI gameTreeAI;
 
+    //public bool test;
+
     // Use this for initialization
     void Start() {
     	currInterval = AIMoveInterval;
@@ -28,6 +30,15 @@ public class AIScript : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+        //if (test)
+        //{
+        //    test = false;
+        //    var g = new RLGameState();
+        //    var state = g.GetCurrentState();
+        //    foreach (var i in state)
+        //        Debug.Log(i);
+        //}
+
         if (AIEnabled)
         {
             settings.setAutoMove(false);
