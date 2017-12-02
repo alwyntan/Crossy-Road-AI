@@ -15,6 +15,7 @@ TagManager:
   - TestCar
   - TestLog
   - TestPlayer
+  - Death
   layers:
   - Default
   - TransparentFX

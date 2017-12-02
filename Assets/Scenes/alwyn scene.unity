@@ -404,7 +404,7 @@ MonoBehaviour:
   left: 0
   right: 0
   getBestMove: 0
-  depthSetting: 3
+  depthSetting: 4
   AIMoveInterval: 0.01
 --- !u!1001 &673305433
 Prefab:
@@ -553,6 +553,11 @@ Prefab:
         type: 2}
       propertyPath: m_Size.z
       value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114782078367347860, guid: 5ec7c58b8c921b34b8cebcac85154fc4,
+        type: 2}
+      propertyPath: NumberSpawns
+      value: 150
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5ec7c58b8c921b34b8cebcac85154fc4, type: 2}
