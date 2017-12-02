@@ -24,7 +24,7 @@ public class rlScript : MonoBehaviour {
 		public Direction dir;
 	}
 
-	private struct dirProbability {
+	private class dirProbability {
 		public Direction dir;
 		public float prob;
 	}
@@ -42,27 +42,32 @@ public class rlScript : MonoBehaviour {
 	void Update () {
 		//GetState.
 		//CurrentState <Alywn's function>
-		List<int> currstate = new List<int>();
+		//List<int> currstate = new List<int>();
+		RLGameState rlGameState = new RLGameState();
+		List<int> currstate = rlGameState.GetCurrentState();
 
 		if (rlEnabled)
 		{
 			
-			float normalizingConstant;
+			float normalizingConstant = 1.0f;
 			bool containsNoQ_optsForState = false;
 			List<dirProbability> listOfDirProb = new List<dirProbability> ();
 
+			//bool allDirectionsHaveQValues = true;
 
-			foreach (Direction dir in Enum.GetValues(typeof(Direction))){
+			foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
 				
 				stateAction tempStateAction = new stateAction();
 				tempStateAction.state = currstate;
 				tempStateAction.dir = dir;
+
 				// for any 1 state
-				if 	(!qvalues.ContainsKey(tempStateAction) 
-					&& dir == Enum.GetValues(typeof(Direction))[0]){
-					containsNoQ_optsForState = true;
+				//fix; // boolean for all directions have q values
+				/*if (!qvalues.ContainsKey(tempStateAction)) {
+					allDirectionsHaveQValues = false;
 					break;
-				}
+				}*/
+
 				var qvalue = qvalues [tempStateAction];
 				normalizingConstant += qvalue;
 
@@ -71,39 +76,42 @@ public class rlScript : MonoBehaviour {
 				temp.prob = qvalue;
 				listOfDirProb.Add (temp);
 			}
-			Direction ourChoice;
+			Direction ourChoice = Direction.FRONT;
 			if (!containsNoQ_optsForState) {
-				foreach (var i in listOfDirProb) {
-					i.prob = i.prob / normalizingConstant;
+				for (int i = 0; i < listOfDirProb.Count; i++) {
+					listOfDirProb [i].prob = listOfDirProb [i].prob / normalizingConstant;
 				}
+
+				/*foreach (var i in listOfDirProb) {
+					i.prob = i.prob / normalizingConstant;
+				}*/
 
 				float choiceRandom = Random.Range (0, 1);
 
 				// Sort it by the order of the probabilty. <VERY IMPORTANT>
-				Array.Sort<listOfDirProb>(listOfDirProb, (x,y) => x.prob.CompareTo(y.prob));
-				//
+				listOfDirProb.Sort((x,y) => x.prob.CompareTo(y.prob));
+
 				foreach (var i in listOfDirProb) {
 					if (i.prob <= choiceRandom) {
 						ourChoice = i.dir;
 					}
 				} 
 			} else {
-				List<Direction> values = Enum.GetValues(typeof(Direction));
-				int rand = Random.Range (0, values.Count+1);
+				Direction[] values = (Direction[])System.Enum.GetValues(typeof(Direction));
+				int rand = Random.Range (0, values.Length + 1);
 				ourChoice = values[rand];
 			}
 
-
 			movePlayer (ourChoice);
-			manualMoveAllObjects;
+			manualMoveAllObjects();
 			//Get NewState 
 			//NewState <Alywn's function>
 
 			//Get Vopt For new State
 			float Vopt = -Mathf.Infinity;
-			foreach (Direction dir in Enum.GetValues(typeof(Direction))) {
+			foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
 				stateAction newStateAction = new stateAction();
-				newStateAction.state = newState;
+				newStateAction.state = rlGameState.GetCurrentState();
 				newStateAction.dir = dir;
 				if (qvalues.ContainsKey(newStateAction)){
 						if (Vopt < qvalues[newStateAction]){
@@ -113,16 +121,16 @@ public class rlScript : MonoBehaviour {
 			}
 
 			//Get Reward <Alywn's function>
-			var r = 0;
+			int r = 8;
 			//Calculate Eta?
-			float eta = 0.01;
+			float eta = 0.01f;
 
 			stateAction currStateAction = new stateAction();
 			currStateAction.state = currstate;
 			currStateAction.dir = ourChoice;
 
 			//Q learning Function
-			qvalues[currStateAction] -= eta(qvalues[currStateAction] - (r + discountFactor* Vopt));
+			qvalues[currStateAction] -= eta * (qvalues[currStateAction] - (r + discountFactor * Vopt));
 			}
 	}
 		
