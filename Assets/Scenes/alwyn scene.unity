@@ -395,16 +395,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameState: {fileID: 1901600798}
-  AIEnabled: 0
-  move: 0
-  init: 0
-  setNextState: 0
-  clear: 0
-  forward: 0
-  back: 0
-  left: 0
-  right: 0
-  getBestMove: 0
+  AIEnabled: 1
+  AI_type: 0
   depthSetting: 3
   AIMoveInterval: 0.01
 --- !u!1001 &673305433
