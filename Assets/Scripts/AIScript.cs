@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CustomDefinitions;
+using System.IO;
 
 public class AIScript : MonoBehaviour {
 
@@ -35,10 +36,13 @@ public class AIScript : MonoBehaviour {
         //if (test)
         //{
         //    test = false;
-        //    var g = new RLGameState();
-        //    var state = g.GetCurrentState();
-        //    foreach (var i in state)
-        //        Debug.Log(i);
+        //    StreamWriter writer = new StreamWriter("Assets/Resources/data.txt");
+        //    writer.Write("File created using StreamWriter class.");
+        //    writer.Close();
+        //    //var g = new RLGameState();
+        //    //var state = g.GetCurrentState();
+        //    //foreach (var i in state)
+        //    //    Debug.Log(i);
         //}
 
         if (AIEnabled)

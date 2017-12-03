@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CustomDefinitions;
+using System.IO;
 
 public class RLAI {
 	public float AIMoveInterval = 0.1f;
@@ -44,35 +45,55 @@ public class RLAI {
 			//add this line
 			saveString += line;
 		}
-		//Save String.
-	}
+        //Save String.
+        StreamWriter writer = new StreamWriter("Assets/Resources/data.txt");
+        writer.Write(saveString);
+        writer.Close();
+    }
 
 	public void readDictionay(){
 		Dictionary<stateAction, float> newDict = new Dictionary<stateAction, float>();
 
+        StreamReader reader = new StreamReader("Assets/Resources/data.txt");
+        try
+        {
+            do
+            {
+                string line = reader.ReadLine();
+                // Save each line like [0,1,1,1,1,0,0,0]|direction| value 
+                //For each line in string.
+                string[] splitString = line.Split('|');
 
-		// Save each line like [0,1,1,1,1,0,0,0]|direction| value 
-		//For each line in string.
-		string line = "This is a line|something|something";
-		string[] splitString = line.Split ('|');
+                string listAsString = splitString[0];
+                string[] features = listAsString.Split(',');
 
-		string listAsString = splitString [0];
-		string[] features = listAsString.Split(',');
+                List<int> state = new List<int>();
+                foreach (var i in features)
+                {
+                    int j = int.Parse(i);
+                    state.Add(j);
+                }
 
-		List<int> state = new List<int> ();
-		foreach (var i in features) {
-			int j = int.Parse (i);
-			state.Add (j);
-		}
+                Direction dir = (Direction)int.Parse(splitString[1]);
 
-		Direction dir = (Direction)int.Parse (splitString [1]);
+                float value = float.Parse(splitString[3]);
+                stateAction newStateAction = new stateAction();
+                newStateAction.state = state;
+                newStateAction.dir = dir;
+                newDict[newStateAction] = value;
+            }
+            while (reader.Peek() != -1);
+        }
 
-		float value = float.Parse (splitString [3]);
-		stateAction newStateAction = new stateAction();
-		newStateAction.state = state;
-		newStateAction.dir = dir;
-		newDict [newStateAction] = value;
+        catch
+        {
+            Debug.Log("File is empty");
+        }
 
+        finally
+        {
+            reader.Close();
+        }
 	}
 
 	public void MakeMove() {
