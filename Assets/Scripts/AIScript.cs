@@ -18,6 +18,7 @@ public class AIScript : MonoBehaviour {
 	private Settings settings;
 
     private GameTreeAI gameTreeAI;
+	private RLAI rlAI;
 
     //public bool test;
 
@@ -26,6 +27,7 @@ public class AIScript : MonoBehaviour {
     	currInterval = AIMoveInterval;
         settings = GameObject.FindObjectOfType<Settings>().GetComponent<Settings>();
         gameTreeAI = new GameTreeAI(gameState, depthSetting, AIMoveInterval);
+		rlAI = new RLAI (AIMoveInterval);
     }
 
 	// Update is called once per frame
@@ -53,6 +55,15 @@ public class AIScript : MonoBehaviour {
                         currInterval = AIMoveInterval;
                     }
                     break;
+
+				case AIType.QLearning:
+					if (currInterval < 0 && rlAI.Moved)
+					{
+						rlAI.Moved = false;
+						rlAI.MakeMove();
+						currInterval = AIMoveInterval;
+					}
+					break;
             }
 
             currInterval -= Time.deltaTime;
