@@ -13,7 +13,27 @@ public class RLAI {
 	private struct stateAction {
 		public List<int> state;
 		public Direction dir;
-	}
+		public string toString(){
+			List<string> stringFeatures = new List<string>();
+			foreach (var i in state) {
+				stringFeatures.Add(""+ i);
+			}
+			string stateString = string.Join( ",", stringFeatures.ToArray());
+			return stateString + "|" + (int)dir;
+		}
+		public static bool operator ==(stateAction x, stateAction y) {
+			return x.state == y.state && x.dir == y.dir;
+		}
+		public static bool operator !=(stateAction x, stateAction y) {
+			return !(x == y);
+		}
+		public override int GetHashCode() {
+			return state.GetHashCode ();
+		}
+		public override bool Equals(object x) {
+			return x is stateAction && this == (stateAction)x;
+		}
+ 	}
 
 	private class dirProbability {
 		public Direction dir;
@@ -22,7 +42,7 @@ public class RLAI {
 
 	private int countFront = 0;
 	//Q_opt is Q_opt(s,a) -> value.
-	Dictionary<stateAction, float> qvalues = new Dictionary<stateAction, float>();
+	Dictionary<string, float> qvalues = new Dictionary<string, float>();
 
 	public RLAI(float AIMoveInterval) {
 		this.AIMoveInterval = AIMoveInterval;
@@ -32,18 +52,13 @@ public class RLAI {
 	public void saveDictionay(){
 		// Save each line like [0,1,1,1,1,0,0,0]|direction|value 
 		string saveString = "";
+		foreach (var i in qvalues) {
+			Debug.Log( i + "|" + i.Value);
+		}
 		foreach (var k in qvalues){
 			var key = k.Key;
-			string line = "";
-			string value =  "" + qvalues [key];
-			List<string> stringFeatures = new List<string>();
-			foreach (var i in key.state) {
-				stringFeatures.Add(""+ i);
-			}
-			string stateString = string.Join( ",", stringFeatures.ToArray());
-			string dir = "" + (int)key.dir; 
 			//When turning it back. Cast as int, then cast as dir.
-			line = stateString +"|" + dir + "|" + value + '\n';
+			string line = k.Key + "|" + k.Value + '\n';
 			//add this line
 			saveString += line;
 		}
@@ -54,7 +69,7 @@ public class RLAI {
     }
 
 	public void readDictionay(){
-		Dictionary<stateAction, float> newDict = new Dictionary<stateAction, float>();
+		Dictionary<string, float> newDict = new Dictionary<string, float>();
 
         StreamReader reader = new StreamReader("Assets/Resources/data.txt");
         try
@@ -65,24 +80,9 @@ public class RLAI {
                 // Save each line like [0,1,1,1,1,0,0,0]|direction| value 
                 //For each line in string.
                 string[] splitString = line.Split('|');
-
-                string listAsString = splitString[0];
-                string[] features = listAsString.Split(',');
-
-                List<int> state = new List<int>();
-                foreach (var i in features)
-                {
-                    int j = int.Parse(i);
-                    state.Add(j);
-                }
-
-                Direction dir = (Direction)int.Parse(splitString[1]);
-
+				string key = splitString[0] + splitString[1];
                 float value = float.Parse(splitString[3]);
-                stateAction newStateAction = new stateAction();
-                newStateAction.state = state;
-                newStateAction.dir = dir;
-                newDict[newStateAction] = value;
+				newDict[key] = value;
             }
             while (reader.Peek() != -1);
         }
@@ -104,8 +104,9 @@ public class RLAI {
 		RLGameState rlGameState = new RLGameState();
 		List<int> currstate = rlGameState.GetCurrentState();
 
+		//First Change: MakeChoice.
 		Direction ourChoice = makeChoice (currstate);
-		movePlayer (ourChoice);
+		bool successfullymoved = successfullyMovedPos (ourChoice);
 		manualMoveAllObjects();
 
 		//Get Vopt For new State
@@ -117,37 +118,39 @@ public class RLAI {
 		//Get Reward <Alywn's function>
 		float r = 0;
 		//+8 for forward,
-		if (ourChoice == Direction.FRONT) {
+		if (ourChoice == Direction.FRONT && successfullymoved) {
 			countFront++;
 			r += 8;
 		//-9 for backward,
-		} else if (ourChoice == Direction.BACK) {
+		} else if (ourChoice == Direction.BACK && successfullymoved) {
 			countFront--;
 			r -= 9;
 		}  
+		if (!successfullymoved){
+			r -= 50;
+		}
 		//-1000 if dead,
 		if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().IsDead()) {
-			r -= 1000;
+			r -= 300;
 		}
 		//+10 every 5 streets
 		if (countFront == 5) {
-			r += 10;
+			r += 50;
 			countFront = 0;
 		} 
 		//-D if the road infront of the player is a river (Distance to closest log)
-				 
+		Debug.Log("REWARD: " + r);		 
 		//Calculate Eta?
 		float eta = 0.01f;
 
-		stateAction currStateAction = new stateAction();
-		currStateAction.state = currstate;
-		currStateAction.dir = ourChoice;
-		if (!qvalues.ContainsKey (currStateAction)) {
-			qvalues [currStateAction] = 0;
+
+		var key = stateActionToString(currstate,ourChoice);
+		if (!qvalues.ContainsKey (key)) {
+			qvalues [key] = 0;
 		}
 
 		//Q learning Function
-		qvalues[currStateAction] -= eta * (qvalues[currStateAction] - (r + discountFactor * Vopt));
+		qvalues[key] -= eta * (qvalues[key] - (r + discountFactor * Vopt));
 
 		if (GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerControl> ().IsDead()) {
 			saveDictionay ();
@@ -172,6 +175,17 @@ public class RLAI {
 			s.GetComponent<Spawner>().manualUpdate(AIMoveInterval);
 		foreach (var s in carSpawners)
 			s.GetComponent<Spawner>().manualUpdate(AIMoveInterval);
+	}
+
+	private bool successfullyMovedPos(Direction ourChoice) {
+
+		var pos = GameObject.FindGameObjectWithTag ("Player").transform.position;
+		movePlayer (ourChoice); 
+		var newpos = GameObject.FindGameObjectWithTag ("Player").transform.position;
+		if (newpos == pos) {
+			return false;
+		} 
+		return true;
 	}
 
 	void movePlayer(Direction dir)
@@ -202,21 +216,20 @@ public class RLAI {
 		//bool allDirectionsHaveQValues = true;
 
 		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
+			var key = stateActionToString (currstate, dir);
 
-			stateAction tempStateAction = new stateAction();
-			tempStateAction.state = currstate;
-			tempStateAction.dir = dir;
-
-
-			if (!qvalues.ContainsKey (tempStateAction) && !containsQ_optsForState) {
+			if (!qvalues.ContainsKey (key) && !containsQ_optsForState) {
 				if (dir == Direction.LEFT){
 					break;
 				}
+
 			} else {
 				containsQ_optsForState = true;
 			}
-
-			var qvalue = qvalues [tempStateAction];
+			if (!qvalues.ContainsKey (key)) {
+				continue;
+			}
+			var qvalue = qvalues [key];
 			normalizingConstant += qvalue;
 
 			dirProbability temp = new dirProbability (); 
@@ -225,8 +238,7 @@ public class RLAI {
 			listOfDirProb.Add (temp);
 		}
 		Direction ourChoice = Direction.FRONT;
-		Debug.Log ("UHM");
-		Debug.Log (containsQ_optsForState);
+
 		if (containsQ_optsForState) {
 			for (int i = 0; i < listOfDirProb.Count; i++) {
 				listOfDirProb [i].prob = listOfDirProb [i].prob / normalizingConstant;
@@ -248,6 +260,7 @@ public class RLAI {
 			int rand = Random.Range (0, values.Length);
 			ourChoice = values[rand];
 		}
+		Debug.Log ("choice: " + ourChoice);
 		return ourChoice;
 	}
 
@@ -255,12 +268,11 @@ public class RLAI {
 		//Get Vopt For new State
 		float Vopt = -Mathf.Infinity;
 		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
-			stateAction newStateAction = new stateAction();
-			newStateAction.state = rlGameState.GetCurrentState();
-			newStateAction.dir = dir;
-			if (qvalues.ContainsKey(newStateAction)){
-				if (Vopt < qvalues[newStateAction]){
-					Vopt = qvalues[newStateAction];
+			
+			var key = stateActionToString(rlGameState.GetCurrentState(),dir);
+			if (qvalues.ContainsKey(key)){
+				if (Vopt < qvalues[key]){
+					Vopt = qvalues[key];
 				}
 			}
 		}
@@ -269,6 +281,16 @@ public class RLAI {
 			Vopt = 0;
 		}
 		return Vopt;
+	}
+
+	private string stateActionToString(List<int> list, Direction dir){
+		List<string> stringFeatures = new List<string>();
+		foreach (var i in list) {
+			stringFeatures.Add(""+ i);
+		}
+		string stateString = string.Join( ",", stringFeatures.ToArray());
+		return stateString + "|" + (int)dir;
+		
 	}
 
 }
