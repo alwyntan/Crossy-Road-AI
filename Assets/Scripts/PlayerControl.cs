@@ -37,14 +37,14 @@ public class PlayerControl : MonoBehaviour {
             else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
                 horiz = 1;
 
-            if (horiz > 0 && canMove(Direction.RIGHT))
+            if (horiz > 0)
                 MoveRight();
-            else if (horiz < 0 && canMove(Direction.LEFT))
+            else if (horiz < 0)
                 MoveLeft();
 
-            if (vert > 0 && canMove(Direction.FRONT))
+            if (vert > 0)
                 MoveForward();
-            else if (vert < 0 && canMove(Direction.BACK))
+            else if (vert < 0)
                 MoveBackward();
         }
     }
@@ -262,46 +262,58 @@ public class PlayerControl : MonoBehaviour {
     // for the AI to control movement
     public void MoveForward(Transform customTransform = null)
     {
-        if (customTransform == null)
+        if (canMove(Direction.FRONT))
         {
-            transform.Translate(Vector3.forward);
-            clip();
+            if (customTransform == null)
+            {
+                transform.Translate(Vector3.forward);
+                clip();
+            }
+            else
+                customTransform.Translate(Vector3.forward);
         }
-        else
-            customTransform.Translate(Vector3.forward);
     }
 
     public void MoveBackward(Transform customTransform = null)
     {
-        if (customTransform == null)
+        if (canMove(Direction.BACK))
         {
-            transform.Translate(Vector3.back);
-            clip();
+            if (customTransform == null)
+            {
+                transform.Translate(Vector3.back);
+                clip();
+            }
+            else
+                customTransform.Translate(Vector3.back);
         }
-        else
-            customTransform.Translate(Vector3.back);
     }
 
     public void MoveRight(Transform customTransform = null)
     {
-        if (customTransform == null)
+        if (canMove(Direction.RIGHT))
         {
-            transform.Translate(Vector3.right);
-            clip();
+            if (customTransform == null)
+            {
+                transform.Translate(Vector3.right);
+                clip();
+            }
+            else
+                customTransform.Translate(Vector3.right);
         }
-        else
-            customTransform.Translate(Vector3.right);
     }
 
     public void MoveLeft(Transform customTransform = null)
     {
-        if (customTransform == null)
+        if (canMove(Direction.LEFT))
         {
-            transform.Translate(Vector3.left);
-            clip();
+            if (customTransform == null)
+            {
+                transform.Translate(Vector3.left);
+                clip();
+            }
+            else
+                customTransform.Translate(Vector3.left);
         }
-        else
-            customTransform.Translate(Vector3.left);
     }
 
 
