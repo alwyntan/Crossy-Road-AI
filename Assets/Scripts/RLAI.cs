@@ -10,6 +10,8 @@ public class RLAI {
 
 	private float discountFactor = 1;
 
+	private float epilson = 0.3f;
+
 	private struct stateAction {
 		public List<int> state;
 		public Direction dir;
@@ -52,9 +54,6 @@ public class RLAI {
 	public void saveDictionay(){
 		// Save each line like [0,1,1,1,1,0,0,0]|direction|value 
 		string saveString = "";
-		foreach (var i in qvalues) {
-			Debug.Log( i + "|" + i.Value);
-		}
 		foreach (var k in qvalues){
 			var key = k.Key;
 			//When turning it back. Cast as int, then cast as dir.
@@ -77,18 +76,21 @@ public class RLAI {
             do
             {
                 string line = reader.ReadLine();
+				Debug.Log(line);
                 // Save each line like [0,1,1,1,1,0,0,0]|direction| value 
                 //For each line in string.
                 string[] splitString = line.Split('|');
-				string key = splitString[0] + splitString[1];
-                float value = float.Parse(splitString[3]);
+				string key = splitString[0] + '|' + splitString[1];
+                float value = float.Parse(splitString[2]);
+				Debug.Log("key: " + key + " value : " + value);
 				newDict[key] = value;
             }
             while (reader.Peek() != -1);
         }
 
-        catch
+		catch (System.Exception e)
         {
+			Debug.Log ("?????????????????" + e);
             Debug.Log("File is empty");
         }
 
@@ -105,10 +107,16 @@ public class RLAI {
 		List<int> currstate = rlGameState.GetCurrentState();
 
 		//First Change: MakeChoice.
-		Direction ourChoice = makeChoice (currstate);
+		Direction ourChoice = makeDeterministicChoice (currstate);
+
 		bool successfullymoved = successfullyMovedPos (ourChoice);
 		manualMoveAllObjects();
-
+		float randFloat = Random.Range (0, 1);
+		if(randFloat < epilson){
+			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
+			int rand = Random.Range (0, values.Length);
+			ourChoice = values [rand];
+		}
 		//Get Vopt For new State
 		float Vopt = findVopt(rlGameState);
 
@@ -139,7 +147,7 @@ public class RLAI {
 			countFront = 0;
 		} 
 		//-D if the road infront of the player is a river (Distance to closest log)
-		Debug.Log("REWARD: " + r);		 
+//		Debug.Log("REWARD: " + r);		 
 		//Calculate Eta?
 		float eta = 0.01f;
 
@@ -260,7 +268,7 @@ public class RLAI {
 			int rand = Random.Range (0, values.Length);
 			ourChoice = values[rand];
 		}
-		Debug.Log ("choice: " + ourChoice);
+//		Debug.Log ("choice: " + ourChoice);
 		return ourChoice;
 	}
 
@@ -268,7 +276,6 @@ public class RLAI {
 		//Get Vopt For new State
 		float Vopt = -Mathf.Infinity;
 		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
-			
 			var key = stateActionToString(rlGameState.GetCurrentState(),dir);
 			if (qvalues.ContainsKey(key)){
 				if (Vopt < qvalues[key]){
@@ -293,4 +300,30 @@ public class RLAI {
 		
 	}
 
+
+
+	private Direction makeDeterministicChoice(List<int> currstate){
+		Direction maxDir = Direction.FRONT;
+		var maxValue = -Mathf.Infinity;
+		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
+			var key = stateActionToString (currstate, dir);
+			if (!qvalues.ContainsKey (key)) {
+				continue;
+			}
+			var qvalue = qvalues [key];
+			if (qvalue > maxValue) {
+				maxValue = qvalue;
+				maxDir = dir;
+			}
+		} 
+		Direction ourChoice = Direction.FRONT;
+		if (maxValue == -Mathf.Infinity) {
+			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
+			int rand = Random.Range (0, values.Length);
+			ourChoice = values [rand];
+		} else {
+			ourChoice = maxDir;
+		}
+		return ourChoice;
+	}
 }
