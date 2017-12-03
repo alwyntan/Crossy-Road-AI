@@ -151,7 +151,6 @@ public class GameState : MonoBehaviour
         bool hasLog = false;
         foreach (var col in collided)
         {
-            Debug.Log(col.tag);
             if (col.CompareTag("Car") || col.CompareTag("Tree") || col.CompareTag("Death"))
             {
                 safetyStatus = 1;
