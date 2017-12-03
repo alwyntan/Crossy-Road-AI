@@ -22,6 +22,8 @@ public class PlayerControl : MonoBehaviour {
     void Update() {
         if (!GetComponent<AIScript>().AIEnabled)
         {
+            if (IsDead())
+                PlayerDie();
             // player move if ai is not enabled
             var vert = 0;
             var horiz = 0;
@@ -269,8 +271,6 @@ public class PlayerControl : MonoBehaviour {
             }
             else
                 customTransform.Translate(Vector3.forward);
-            if (IsDead())
-                PlayerDie();
         }
     }
 
@@ -285,8 +285,6 @@ public class PlayerControl : MonoBehaviour {
             }
             else
                 customTransform.Translate(Vector3.back);
-            if (IsDead())
-                PlayerDie();
         }
     }
 
@@ -301,8 +299,6 @@ public class PlayerControl : MonoBehaviour {
             }
             else
                 customTransform.Translate(Vector3.right);
-            if (IsDead())
-                PlayerDie();
         }
     }
 
@@ -317,8 +313,6 @@ public class PlayerControl : MonoBehaviour {
             }
             else
                 customTransform.Translate(Vector3.left);
-            if (IsDead())
-                PlayerDie();
         }
     }
 
