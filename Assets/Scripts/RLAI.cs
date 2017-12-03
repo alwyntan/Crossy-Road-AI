@@ -20,11 +20,13 @@ public class RLAI {
 		public float prob;
 	}
 
+	private int countFront = 0;
 	//Q_opt is Q_opt(s,a) -> value.
 	Dictionary<stateAction, float> qvalues = new Dictionary<stateAction, float>();
 
 	public RLAI(float AIMoveInterval) {
 		this.AIMoveInterval = AIMoveInterval;
+		readDictionay ();
 	}
 
 	public void saveDictionay(){
@@ -94,6 +96,7 @@ public class RLAI {
         {
             reader.Close();
         }
+		qvalues = newDict;
 	}
 
 	public void MakeMove() {
@@ -112,13 +115,27 @@ public class RLAI {
 
 		// if Dead -> Save the q values to a text file. (and later reload it.)
 		//Get Reward <Alywn's function>
-		int r = 8;
-		//+8 for forward
+		float r = 0;
 		//+8 for forward,
+		if (ourChoice == Direction.FRONT) {
+			countFront++;
+			r += 8;
 		//-9 for backward,
+		} else if (ourChoice == Direction.BACK) {
+			countFront--;
+			r -= 9;
+		}  
 		//-1000 if dead,
-		//+10 every 5 streets,
-		//-D if the road infant of the player is a river (Distance to closest log) 
+		if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().IsDead()) {
+			r -= 1000;
+		}
+		//+10 every 5 streets
+		if (countFront == 5) {
+			r += 10;
+			countFront = 0;
+		} 
+		//-D if the road infront of the player is a river (Distance to closest log)
+				 
 		//Calculate Eta?
 		float eta = 0.01f;
 
@@ -128,8 +145,15 @@ public class RLAI {
 		if (!qvalues.ContainsKey (currStateAction)) {
 			qvalues [currStateAction] = 0;
 		}
+
 		//Q learning Function
 		qvalues[currStateAction] -= eta * (qvalues[currStateAction] - (r + discountFactor * Vopt));
+
+		if (GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerControl> ().IsDead()) {
+			saveDictionay ();
+			GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().RestartGame();
+		}
+
 		Moved = true;
 	}
 		
@@ -201,10 +225,13 @@ public class RLAI {
 			listOfDirProb.Add (temp);
 		}
 		Direction ourChoice = Direction.FRONT;
-		if (!containsQ_optsForState) {
+		Debug.Log ("UHM");
+		Debug.Log (containsQ_optsForState);
+		if (containsQ_optsForState) {
 			for (int i = 0; i < listOfDirProb.Count; i++) {
 				listOfDirProb [i].prob = listOfDirProb [i].prob / normalizingConstant;
 			}
+
 
 			float choiceRandom = Random.Range (0, 1);
 
@@ -218,7 +245,7 @@ public class RLAI {
 			} 
 		} else {
 			Direction[] values = (Direction[])System.Enum.GetValues(typeof(Direction));
-			int rand = Random.Range (0, values.Length + 1);
+			int rand = Random.Range (0, values.Length);
 			ourChoice = values[rand];
 		}
 		return ourChoice;
@@ -236,6 +263,10 @@ public class RLAI {
 					Vopt = qvalues[newStateAction];
 				}
 			}
+		}
+
+		if (Vopt == -Mathf.Infinity) {
+			Vopt = 0;
 		}
 		return Vopt;
 	}
