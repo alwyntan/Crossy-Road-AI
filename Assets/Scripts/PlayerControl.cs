@@ -22,6 +22,8 @@ public class PlayerControl : MonoBehaviour {
     void Update() {
         if (!GetComponent<AIScript>().AIEnabled)
         {
+            if (IsDead())
+                PlayerDie();
             // player move if ai is not enabled
             var vert = 0;
             var horiz = 0;
@@ -125,14 +127,14 @@ public class PlayerControl : MonoBehaviour {
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if ((other.gameObject.CompareTag("Car") || other.gameObject.CompareTag("Water") || other.gameObject.CompareTag("Death")) && GetComponent<Collider>().bounds.Intersects(other.bounds))
-        {
-            Debug.Log(other);
-            playerDie();
-        }
-    }
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if ((other.gameObject.CompareTag("Car") || other.gameObject.CompareTag("Water") || other.gameObject.CompareTag("Death")) && GetComponent<Collider>().bounds.Intersects(other.bounds))
+    //    {
+    //        Debug.Log(other);
+    //        PlayerDie();
+    //    }
+    //}
 
     private void OnCollisionExit(Collision collision)
     {
@@ -145,16 +147,63 @@ public class PlayerControl : MonoBehaviour {
         }
     }
 
-    private void playerDie()
+    public bool IsDead()
+    {
+        var pos = transform.position;
+        pos.y = 0.5f;
+        // 1: safe is 0: unsafe: 1
+        // 2: grass is 0, road is 1, water is 2
+        // 3: moving left is -1, no movement is 0, moving right is 1
+        var list = new List<int>();
+
+        var collided = Physics.OverlapBox(pos, new Vector3(0.4f, 0.8f, 0.4f), Quaternion.identity);
+
+        bool isWater = false;
+
+        foreach (var col in collided)
+        {
+            if (col.CompareTag("Car")|| col.CompareTag("Death"))
+            {
+                return true;
+            }
+
+            if (col.CompareTag("Water"))
+            {
+                isWater = true;
+            }
+
+            if (col.CompareTag("Log"))
+            {
+                return false;
+            }
+        }
+
+        if (isWater) return true;
+        else return false;
+    }
+
+    public void PlayerDie()
     {
         FindObjectOfType<Camera>().transform.parent = null;
         Destroy(this.gameObject);
 
         if (this.settings.AutoRestart)
         {
+            var AIScript = GetComponent<AIScript>();
+            if (AIScript.AI_type == AIScript.AIType.QLearning)
+            {
+                // qlearning must always manually restart. to save data
+                return;
+            }
+
             // auto restarts the game
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            RestartGame();
         }
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void clip(Transform customTransform = null)
