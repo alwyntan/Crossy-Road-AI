@@ -5,17 +5,17 @@ using CustomDefinitions;
 using System.IO;
 
 public class RLAI {
-	public float AIMoveInterval = 0.1f;
+	public float AIMoveInterval = 0.0f;
 	public bool Moved = true;
 
 	private float discountFactor = 1;
 
-	private float epilson = 0.3f;
+	private float epsilon = 0.01f;
 
 	private struct stateAction {
 		public List<int> state;
 		public Direction dir;
-		public string toString(){
+		public string toString() {
 			List<string> stringFeatures = new List<string>();
 			foreach (var i in state) {
 				stringFeatures.Add(""+ i);
@@ -51,7 +51,7 @@ public class RLAI {
 		readDictionay ();
 	}
 
-	public void saveDictionay(){
+	public void saveDictionary(){
 		// Save each line like [0,1,1,1,1,0,0,0]|direction|value 
 		string saveString = "";
 		foreach (var k in qvalues){
@@ -107,16 +107,22 @@ public class RLAI {
 		List<int> currstate = rlGameState.GetCurrentState();
 
 		//First Change: MakeChoice.
-		Direction ourChoice = makeDeterministicChoice (currstate);
+		Direction ourChoice = Direction.STAY;
 
-		bool successfullymoved = successfullyMovedPos (ourChoice);
-		manualMoveAllObjects();
-		float randFloat = Random.Range (0, 1);
-		if(randFloat < epilson){
+		float randFloat = Random.Range (0.0f, 1.0f);
+		//Debug.Log ("float is " + randFloat);
+		if(randFloat < epsilon){
 			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
 			int rand = Random.Range (0, values.Length);
 			ourChoice = values [rand];
+			//Debug.Log ("ourchoice ======= " + ourChoice);
+		} else {
+			ourChoice = makeDeterministicChoice (currstate);
 		}
+
+		bool successfullymoved = successfullyMovedPos (ourChoice);
+		manualMoveAllObjects();
+
 		//Get Vopt For new State
 		float Vopt = findVopt(rlGameState);
 
@@ -126,26 +132,29 @@ public class RLAI {
 		//Get Reward <Alywn's function>
 		float r = 0;
 		//+8 for forward,
-		if (ourChoice == Direction.FRONT && successfullymoved) {
+		if (ourChoice == Direction.FRONT/* && successfullymoved*/) {
 			countFront++;
-			r += 8;
-		//-9 for backward,
-		} else if (ourChoice == Direction.BACK && successfullymoved) {
+			r += 7;
+			//-9 for backward,
+		} else if (ourChoice == Direction.BACK/* && successfullymoved*/) {
 			countFront--;
 			r -= 9;
-		}  
-		if (!successfullymoved){
-			r -= 50;
+		} else if (ourChoice == Direction.STAY) {
+			r -= 8;
 		}
+
+		/*if (!successfullymoved){
+			r -= 50;
+		}*/
 		//-1000 if dead,
 		if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().IsDead()) {
 			r -= 300;
 		}
 		//+10 every 5 streets
-		if (countFront == 5) {
+		/*if (countFront == 5) {
 			r += 50;
 			countFront = 0;
-		} 
+		} */
 		//-D if the road infront of the player is a river (Distance to closest log)
 //		Debug.Log("REWARD: " + r);		 
 		//Calculate Eta?
@@ -158,10 +167,12 @@ public class RLAI {
 		}
 
 		//Q learning Function
-		qvalues[key] -= eta * (qvalues[key] - (r + discountFactor * Vopt));
+		//qvalues[key] -= eta * (qvalues[key] - (r + discountFactor * Vopt));
+		qvalues[key] = (1 - eta) * qvalues[key] + eta * (r + discountFactor * Vopt);
+		//Debug.Log (temp + " == " + qvalues [key]);
 
 		if (GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerControl> ().IsDead()) {
-			saveDictionay ();
+			saveDictionary ();
 			GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().RestartGame();
 		}
 
@@ -300,9 +311,8 @@ public class RLAI {
 		
 	}
 
-
-
-	private Direction makeDeterministicChoice(List<int> currstate){
+	private Direction makeDeterministicChoice(List<int> currstate) {
+		//Debug.Log ("1");
 		Direction maxDir = Direction.FRONT;
 		var maxValue = -Mathf.Infinity;
 		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
@@ -321,8 +331,10 @@ public class RLAI {
 			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
 			int rand = Random.Range (0, values.Length);
 			ourChoice = values [rand];
+			//Debug.Log ("2");
 		} else {
 			ourChoice = maxDir;
+			//Debug.Log ("3");
 		}
 		return ourChoice;
 	}
