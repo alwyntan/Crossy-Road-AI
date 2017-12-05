@@ -10,7 +10,7 @@ public class RLAI {
 
 	private float discountFactor = 1;
 
-	private float epsilon = 0.01f;
+	private float epsilon = 0.3f;
 
 	private struct stateAction {
 		public List<int> state;
@@ -67,7 +67,7 @@ public class RLAI {
 		if (GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore () > highestScore) {
 			Debug.Log("highest score called!: " + highestScore + " | " + GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore ());
 			StreamWriter anotherNamedWriter = new StreamWriter("Assets/Resources/highestScore.txt");
-			string score = "" + GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore (); 
+			string score = "" + GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore ();
 			anotherNamedWriter.Write(score);
 			anotherNamedWriter.Close();
 		}
@@ -124,14 +124,14 @@ public class RLAI {
 
 	public void saveScore(){
 		//Save String.
-		string score = "" + GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore (); 
+		string score = "" + GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore ();
 		StreamWriter writer = new StreamWriter("Assets/Resources/score.txt", true);
 		writer.WriteLine(score);
 		writer.Close();
 	}
 
 	public void saveDictionary(){
-		// Save each line like [0,1,1,1,1,0,0,0]|direction|value 
+		// Save each line like [0,1,1,1,1,0,0,0]|direction|value
 		string saveString = "";
 		foreach (var k in qvalues){
 			var key = k.Key;
@@ -155,7 +155,7 @@ public class RLAI {
             do
             {
                 string line = reader.ReadLine();
-                // Save each line like [0,1,1,1,1,0,0,0]|direction| value 
+                // Save each line like [0,1,1,1,1,0,0,0]|direction| value
                 //For each line in string.
                 string[] splitString = line.Split('|');
 				string key = splitString[0] + '|' + splitString[1];
@@ -184,35 +184,16 @@ public class RLAI {
 		List<int> currstate = rlGameState.GetCurrentState();
 
 		//First Change: MakeChoice.
-<<<<<<< HEAD
 		Direction ourChoice = makeDeterministicChoice (currstate);
 		float randFloat = Random.Range (0.0f, 1.0f);
-		if(randFloat < epilson){
-			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
-			int rand = Random.Range (0, values.Length);
-			ourChoice = values [rand];
-
-		}
-		bool successfullymoved = successfullyMovedPos (ourChoice);
-		manualMoveAllObjects();
-=======
-		Direction ourChoice = Direction.STAY;
-
-		float randFloat = Random.Range (0.0f, 1.0f);
-		//Debug.Log ("float is " + randFloat);
 		if(randFloat < epsilon){
 			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
 			int rand = Random.Range (0, values.Length);
 			ourChoice = values [rand];
-			//Debug.Log ("ourchoice ======= " + ourChoice);
-		} else {
-			ourChoice = makeDeterministicChoice (currstate);
-		}
 
+		}
 		bool successfullymoved = successfullyMovedPos (ourChoice);
 		manualMoveAllObjects();
-
->>>>>>> fa5b401a02ced8e3bb2d87582b2e4448b060b3e9
 		//Get Vopt For new State
 		float Vopt = findVopt(rlGameState);
 
@@ -246,7 +227,7 @@ public class RLAI {
 			countFront = 0;
 		} */
 		//-D if the road infront of the player is a river (Distance to closest log)
-		//Debug.Log("REWARD: " + r);		 
+		//Debug.Log("REWARD: " + r);
 		//Calculate Eta?
 		float eta = 0.01f;
 
@@ -262,20 +243,17 @@ public class RLAI {
 		//Debug.Log (temp + " == " + qvalues [key]);
 
 		if (GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerControl> ().IsDead()) {
-<<<<<<< HEAD
-			saveDictionay ();
+			saveDictionary ();
 			saveIteration ();
 			saveHighestScore ();
 			saveScore ();
-=======
-			saveDictionary ();
->>>>>>> fa5b401a02ced8e3bb2d87582b2e4448b060b3e9
+
 			GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().RestartGame();
 		}
 
 		Moved = true;
 	}
-		
+
 	private void manualMoveAllObjects()
 	{
 		var logs = GameObject.FindGameObjectsWithTag("Log");
@@ -296,11 +274,11 @@ public class RLAI {
 	private bool successfullyMovedPos(Direction ourChoice) {
 
 		var pos = GameObject.FindGameObjectWithTag ("Player").transform.position;
-		movePlayer (ourChoice); 
+		movePlayer (ourChoice);
 		var newpos = GameObject.FindGameObjectWithTag ("Player").transform.position;
 		if (newpos == pos) {
 			return false;
-		} 
+		}
 		return true;
 	}
 
@@ -347,7 +325,7 @@ public class RLAI {
 			var qvalue = qvalues [key];
 			normalizingConstant += qvalue;
 
-			dirProbability temp = new dirProbability (); 
+			dirProbability temp = new dirProbability ();
 			temp.dir = dir;
 			temp.prob = qvalue;
 			listOfDirProb.Add (temp);
@@ -369,7 +347,7 @@ public class RLAI {
 				if (i.prob <= choiceRandom) {
 					ourChoice = i.dir;
 				}
-			} 
+			}
 		} else {
 			Direction[] values = (Direction[])System.Enum.GetValues(typeof(Direction));
 			int rand = Random.Range (0, values.Length);
@@ -405,7 +383,7 @@ public class RLAI {
 		}
 		string stateString = string.Join( ",", stringFeatures.ToArray());
 		return stateString + "|" + (int)dir;
-		
+
 	}
 
 	private Direction makeDeterministicChoice(List<int> currstate) {
@@ -422,7 +400,7 @@ public class RLAI {
 				maxValue = qvalue;
 				maxDir = dir;
 			}
-		} 
+		}
 		Direction ourChoice = Direction.FRONT;
 		if (maxValue == -Mathf.Infinity) {
 			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
