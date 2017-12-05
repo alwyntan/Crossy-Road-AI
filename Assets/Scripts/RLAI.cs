@@ -187,10 +187,24 @@ public class RLAI {
 		Direction ourChoice = makeDeterministicChoice (currstate);
 		float randFloat = Random.Range (0.0f, 1.0f);
 		if(randFloat < epsilon){
-			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
-			int rand = Random.Range (0, values.Length);
-			ourChoice = values [rand];
-
+			Debug.Log("EPSILON");
+			//Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
+			//currstate
+			List<Direction> epsilonList = new  List<Direction>();
+			if(currstate[1] == 0){
+				epsilonList.Add (Direction.FRONT);
+			} else if(currstate[3] == 0){
+				epsilonList.Add(Direction.LEFT);
+			} else if(currstate[4] == 0){
+				epsilonList.Add(Direction.RIGHT);
+			} else if(currstate[6] == 0){
+				epsilonList.Add(Direction.BACK);
+			}
+			Debug.Log (epsilonList);
+			epsilonList.Add(Direction.STAY);
+			int rand = Random.Range (0, epsilonList.Count);
+			Debug.Log (epsilonList [rand]);
+			ourChoice = epsilonList [rand];
 		}
 		bool successfullymoved = successfullyMovedPos (ourChoice);
 		manualMoveAllObjects();

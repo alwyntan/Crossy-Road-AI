@@ -399,14 +399,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameState: {fileID: 1901600798}
-  AIEnabled: 1
+  AIEnabled: 0
   AI_type: 1
   depthSetting: 3
-<<<<<<< HEAD
   AIMoveInterval: 0.1
-=======
-  AIMoveInterval: 0.05
->>>>>>> fa5b401a02ced8e3bb2d87582b2e4448b060b3e9
+  test: 0
 --- !u!1001 &673305433
 Prefab:
   m_ObjectHideFlags: 0
@@ -703,11 +700,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1517487336}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-<<<<<<< HEAD
-  m_LocalPosition: {x: -391, y: 320, z: 0}
-=======
-  m_LocalPosition: {x: -330, y: 160, z: 0}
->>>>>>> fa5b401a02ced8e3bb2d87582b2e4448b060b3e9
+  m_LocalPosition: {x: -367, y: 332, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1718101561}
@@ -839,11 +832,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1718101557}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-<<<<<<< HEAD
-  m_LocalPosition: {x: 491, y: 370, z: 0}
-=======
-  m_LocalPosition: {x: 430, y: 210, z: 0}
->>>>>>> fa5b401a02ced8e3bb2d87582b2e4448b060b3e9
+  m_LocalPosition: {x: 467, y: 382, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1517487337}

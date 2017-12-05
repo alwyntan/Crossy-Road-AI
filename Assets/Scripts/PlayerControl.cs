@@ -269,8 +269,8 @@ public class PlayerControl : MonoBehaviour {
                 transform.Translate(Vector3.forward);
                 clip();
             }
-            else
-                customTransform.Translate(Vector3.forward);
+			else
+				customTransform.Translate(Vector3.forward);
         }
     }
 
