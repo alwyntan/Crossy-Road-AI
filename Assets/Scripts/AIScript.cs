@@ -21,7 +21,7 @@ public class AIScript : MonoBehaviour {
     private GameTreeAI gameTreeAI;
 	private RLAI rlAI;
 
-    //public bool test;
+//    public bool test;
 
     // Use this for initialization
     void Start() {
@@ -33,17 +33,21 @@ public class AIScript : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        //if (test)
-        //{
-        //    test = false;
-        //    StreamWriter writer = new StreamWriter("Assets/Resources/data.txt");
-        //    writer.Write("File created using StreamWriter class.");
-        //    writer.Close();
-        //    //var g = new RLGameState();
-        //    //var state = g.GetCurrentState();
-        //    //foreach (var i in state)
-        //    //    Debug.Log(i);
-        //}
+//        if (test)
+//        {
+//        //    test = false;
+//        //    StreamWriter writer = new StreamWriter("Assets/Resources/data.txt");
+//        //    writer.Write("File created using StreamWriter class.");
+//        //    writer.Close();
+//            var g = new RLGameState();
+//            var state = g.GetCurrentState();
+//			int count = 0;
+//			foreach (var i in state) {
+//				count++;
+//				Debug.Log (count + " " + i);
+//			}
+//			test = false;
+//        }
 
         if (AIEnabled)
         {

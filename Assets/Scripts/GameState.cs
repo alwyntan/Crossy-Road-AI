@@ -148,7 +148,7 @@ public class GameState : MonoBehaviour
         int safetyStatus = 0;
         int floorStatus = 0;
         int moveStatus = 0;
-        bool hasLog = false;
+        bool hasLog = false;	
         foreach (var col in collided)
         {
             if (col.CompareTag("Car") || col.CompareTag("Tree") || col.CompareTag("Death"))

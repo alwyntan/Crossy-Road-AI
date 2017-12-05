@@ -260,9 +260,9 @@ public class PlayerControl : MonoBehaviour {
 
 
     // for the AI to control movement
-    public void MoveForward(Transform customTransform = null)
+	public void MoveForward(Transform customTransform = null, bool oride = false)
     {
-        if (canMove(Direction.FRONT))
+        if (canMove(Direction.FRONT) || oride)
         {
             if (customTransform == null)
             {
@@ -274,9 +274,9 @@ public class PlayerControl : MonoBehaviour {
         }
     }
 
-    public void MoveBackward(Transform customTransform = null)
+	public void MoveBackward(Transform customTransform = null, bool oride = false)
     {
-        if (canMove(Direction.BACK))
+		if (canMove(Direction.BACK) || oride)
         {
             if (customTransform == null)
             {
@@ -288,9 +288,9 @@ public class PlayerControl : MonoBehaviour {
         }
     }
 
-    public void MoveRight(Transform customTransform = null)
+	public void MoveRight(Transform customTransform = null, bool oride = false)
     {
-        if (canMove(Direction.RIGHT))
+		if (canMove(Direction.RIGHT) || oride)
         {
             if (customTransform == null)
             {
@@ -302,9 +302,9 @@ public class PlayerControl : MonoBehaviour {
         }
     }
 
-    public void MoveLeft(Transform customTransform = null)
+	public void MoveLeft(Transform customTransform = null, bool oride = false)
     {
-        if (canMove(Direction.LEFT))
+		if (canMove(Direction.LEFT) || oride)
         {
             if (customTransform == null)
             {

@@ -37,6 +37,9 @@ public class RLAI {
 		}
  	}
 
+	private int iterationCount = 0;
+	private int highestScore = 0;
+
 	private class dirProbability {
 		public Direction dir;
 		public float prob;
@@ -49,6 +52,82 @@ public class RLAI {
 	public RLAI(float AIMoveInterval) {
 		this.AIMoveInterval = AIMoveInterval;
 		readDictionay ();
+		readIteration ();
+		readHighestScore ();
+	}
+
+	private void saveIteration(){
+		StreamWriter anotherNamedWriter = new StreamWriter("Assets/Resources/iteration.txt");
+		string iteration = "" + iterationCount;
+		anotherNamedWriter.Write(iteration);
+		anotherNamedWriter.Close();
+	}
+
+	private void saveHighestScore(){
+		if (GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore () > highestScore) {
+			Debug.Log("highest score called!: " + highestScore + " | " + GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore ());
+			StreamWriter anotherNamedWriter = new StreamWriter("Assets/Resources/highestScore.txt");
+			string score = "" + GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore (); 
+			anotherNamedWriter.Write(score);
+			anotherNamedWriter.Close();
+		}
+	}
+
+	private void readHighestScore(){
+		StreamReader reader = new StreamReader("Assets/Resources/highestScore.txt");
+		try
+		{
+			do
+			{
+				string line = reader.ReadLine();
+				int value = int.Parse(line);
+				Debug.Log("Highest Score!!!!: " + value);
+				highestScore = value;
+			}
+			while (reader.Peek() != -1);
+		}
+		catch (System.Exception e)
+		{
+			Debug.Log ("Error inside read score!" + e);
+			Debug.Log("score is empty");
+		}
+		finally
+		{
+			reader.Close();
+		}
+	}
+
+
+
+	private void readIteration(){
+		StreamReader reader = new StreamReader("Assets/Resources/iteration.txt");
+		try
+		{
+			do
+			{
+				string line = reader.ReadLine();
+				int value = int.Parse(line);
+				iterationCount = value + 1;
+			}
+			while (reader.Peek() != -1);
+		}
+		catch (System.Exception e)
+		{
+		Debug.Log ("Error inside read iteration!" + e);
+		Debug.Log("Iteration is empty");
+		}
+		finally
+		{
+		reader.Close();
+		}
+	}
+
+	public void saveScore(){
+		//Save String.
+		string score = "" + GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerScore> ().GetScore (); 
+		StreamWriter writer = new StreamWriter("Assets/Resources/score.txt", true);
+		writer.WriteLine(score);
+		writer.Close();
 	}
 
 	public void saveDictionay(){
@@ -76,13 +155,11 @@ public class RLAI {
             do
             {
                 string line = reader.ReadLine();
-				Debug.Log(line);
                 // Save each line like [0,1,1,1,1,0,0,0]|direction| value 
                 //For each line in string.
                 string[] splitString = line.Split('|');
 				string key = splitString[0] + '|' + splitString[1];
                 float value = float.Parse(splitString[2]);
-				Debug.Log("key: " + key + " value : " + value);
 				newDict[key] = value;
             }
             while (reader.Peek() != -1);
@@ -108,15 +185,15 @@ public class RLAI {
 
 		//First Change: MakeChoice.
 		Direction ourChoice = makeDeterministicChoice (currstate);
-
-		bool successfullymoved = successfullyMovedPos (ourChoice);
-		manualMoveAllObjects();
-		float randFloat = Random.Range (0, 1);
+		float randFloat = Random.Range (0.0f, 1.0f);
 		if(randFloat < epilson){
 			Direction[] values = (Direction[])System.Enum.GetValues (typeof(Direction));
 			int rand = Random.Range (0, values.Length);
 			ourChoice = values [rand];
+
 		}
+		bool successfullymoved = successfullyMovedPos (ourChoice);
+		manualMoveAllObjects();
 		//Get Vopt For new State
 		float Vopt = findVopt(rlGameState);
 
@@ -147,7 +224,7 @@ public class RLAI {
 			countFront = 0;
 		} 
 		//-D if the road infront of the player is a river (Distance to closest log)
-//		Debug.Log("REWARD: " + r);		 
+		//Debug.Log("REWARD: " + r);		 
 		//Calculate Eta?
 		float eta = 0.01f;
 
@@ -162,6 +239,9 @@ public class RLAI {
 
 		if (GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerControl> ().IsDead()) {
 			saveDictionay ();
+			saveIteration ();
+			saveHighestScore ();
+			saveScore ();
 			GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().RestartGame();
 		}
 
@@ -222,7 +302,6 @@ public class RLAI {
 		List<dirProbability> listOfDirProb = new List<dirProbability> ();
 
 		//bool allDirectionsHaveQValues = true;
-
 		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
 			var key = stateActionToString (currstate, dir);
 
@@ -268,7 +347,6 @@ public class RLAI {
 			int rand = Random.Range (0, values.Length);
 			ourChoice = values[rand];
 		}
-//		Debug.Log ("choice: " + ourChoice);
 		return ourChoice;
 	}
 
@@ -277,10 +355,12 @@ public class RLAI {
 		float Vopt = -Mathf.Infinity;
 		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
 			var key = stateActionToString(rlGameState.GetCurrentState(),dir);
-			if (qvalues.ContainsKey(key)){
-				if (Vopt < qvalues[key]){
-					Vopt = qvalues[key];
-				}
+			if (!qvalues.ContainsKey (key)) {
+				continue;
+//				qvalues [key] = 0;
+			}
+			if (Vopt < qvalues[key]){
+				Vopt = qvalues[key];
 			}
 		}
 
@@ -307,10 +387,10 @@ public class RLAI {
 		var maxValue = -Mathf.Infinity;
 		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
 			var key = stateActionToString (currstate, dir);
-			if (!qvalues.ContainsKey (key)) {
-				continue;
+			var qvalue = 0.0f;
+			if (qvalues.ContainsKey (key)) {
+				qvalue = qvalues [key];
 			}
-			var qvalue = qvalues [key];
 			if (qvalue > maxValue) {
 				maxValue = qvalue;
 				maxDir = dir;

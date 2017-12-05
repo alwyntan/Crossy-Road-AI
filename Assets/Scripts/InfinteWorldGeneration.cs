@@ -22,6 +22,7 @@ public class InfinteWorldGeneration : MonoBehaviour {
     void create(int zLocation)
     {
         int x = Random.Range(0, 3);
+//		x = Random.Range (-1, 1);
         if (x == 0)
         {
             Instantiate(settings.RoadPrefab, new Vector3(0, 0, zLocation), Quaternion.identity);

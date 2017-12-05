@@ -34,7 +34,12 @@ public class RLGameState
     /// 11 : front row
     /// 12 : curr row
     /// 13 : back row
-    /// 
+	/// 
+	/// index 14-16
+    /// 14: front row
+	/// 15: curr row
+	/// 16: back row
+	/// 
     /// </summary>
     /// <returns></returns>
     public List<int> GetCurrentState()
@@ -57,11 +62,11 @@ public class RLGameState
             {
                 Collider playerCollider = gameState.GetPlayer();
                 // move up if 1st row, dun mov if 2nd and move down if 3rd (will move also ltr on in the below function)
-                if (i == 0) movePlayer(Direction.FRONT, playerCollider.transform);
-                if (i == 2) movePlayer(Direction.BACK, playerCollider.transform);
+                if (i == 0) movePlayer(Direction.FRONT, playerCollider.transform, true);
+                if (i == 2) movePlayer(Direction.BACK, playerCollider.transform, true);
                 // move left right depending
-                if (z == 0) movePlayer(Direction.LEFT, playerCollider.transform);
-                if (z == 2) movePlayer(Direction.RIGHT, playerCollider.transform);
+                if (z == 0) movePlayer(Direction.LEFT, playerCollider.transform, true);
+				if (z == j - 1) movePlayer(Direction.RIGHT, playerCollider.transform, true);
 
                 //get the state
                 List<int> playerState = gameState.getPlayerStatusInRealWorld(playerCollider);
@@ -96,21 +101,21 @@ public class RLGameState
         return state;
     }
 
-    void movePlayer(Direction dir, Transform trans = null)
+	void movePlayer(Direction dir, Transform trans = null, bool oride = false)
     {
         switch (dir)
         {
             case Direction.FRONT:
-                GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().MoveForward(trans);
+                GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().MoveForward(trans, oride);
                 break;
             case Direction.BACK:
-                GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().MoveBackward(trans);
+                GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().MoveBackward(trans, oride);
                 break;
             case Direction.RIGHT:
-                GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().MoveRight(trans);
+                GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().MoveRight(trans, oride);
                 break;
             case Direction.LEFT:
-                GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().MoveLeft(trans);
+                GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().MoveLeft(trans, oride);
                 break;
             default:
                 break;
