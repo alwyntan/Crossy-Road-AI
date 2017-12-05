@@ -52,6 +52,7 @@ Temporary Items
 /[Bb]uild/
 /[Bb]uilds/
 /Assets/AssetStoreTools*
+/Assets/Resources
 
 # Visual Studio 2015 cache directory
 /.vs/
