@@ -190,17 +190,16 @@ public class RLAI {
 			List<Direction> epsilonList = new  List<Direction>();
 			if(currstate[1] == 0){
 				epsilonList.Add (Direction.FRONT);
-			} 
+			}
 			if(currstate[3] == 0){
 				epsilonList.Add(Direction.LEFT);
-			} 
+			}
 			if(currstate[4] == 0){
 				epsilonList.Add(Direction.RIGHT);
-			} 
+			}
 			if(currstate[6] == 0){
 				epsilonList.Add(Direction.BACK);
 			}
-
 			epsilonList.Add(Direction.STAY);
 			int rand = Random.Range (0, epsilonList.Count);
 			ourChoice = epsilonList [rand];
