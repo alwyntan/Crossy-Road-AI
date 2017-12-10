@@ -155,6 +155,7 @@ public class RLAI {
             do
             {
                 string line = reader.ReadLine();
+				Debug.Log(line);
                 // Save each line like [0,1,1,1,1,0,0,0]|direction| value
                 //For each line in string.
                 string[] splitString = line.Split('|');
@@ -190,16 +191,17 @@ public class RLAI {
 			List<Direction> epsilonList = new  List<Direction>();
 			if(currstate[1] == 0){
 				epsilonList.Add (Direction.FRONT);
-			}
+			} 
 			if(currstate[3] == 0){
 				epsilonList.Add(Direction.LEFT);
-			}
+			} 
 			if(currstate[4] == 0){
 				epsilonList.Add(Direction.RIGHT);
-			}
+			} 
 			if(currstate[6] == 0){
 				epsilonList.Add(Direction.BACK);
 			}
+
 			epsilonList.Add(Direction.STAY);
 			int rand = Random.Range (0, epsilonList.Count);
 			ourChoice = epsilonList [rand];
