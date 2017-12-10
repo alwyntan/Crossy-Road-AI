@@ -13,18 +13,54 @@ public class RLAIFA {
 
 	private float epsilon = 0.3f;
 
+	private List<int> weight = new List<int> ();
+
 	public RLAIFA(float AIMoveInterval) {
 		this.AIMoveInterval = AIMoveInterval;
 	}
 
-	// Use this for initialization
-	void Start () {
-		
+	private class Qvalue_Direction_Pair {
+		public Direction dir;
+		public float qvalue;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+
+	private void saveWeight(){
+		StreamWriter anotherNamedWriter = new StreamWriter("Assets/Resources/weight.txt");
+		string weightString = "";
+		foreach (var rock  in weight) {
+			weightString += " " + rock;
+		}
+		anotherNamedWriter.Write(weightString);
+		anotherNamedWriter.Close();
+	}
+
+	private void readWeight(){
+		StreamReader reader = new StreamReader("Assets/Resources/weight.txt");
+		List<int> newWeight = new List<int> ();
+		try
+		{
+			do
+			{
+				string line = reader.ReadLine();
+				string[] splitString = line.Split();
+				foreach (var stringValue in splitString){
+					float value = float.Parse(stringValue);
+					newWeight.Add(value);
+				}
+
+			}
+			while (reader.Peek() != -1);
+		}
+		catch (System.Exception e)
+		{
+			Debug.Log ("Error inside read score!" + e);
+			Debug.Log("score is empty");
+		}
+		finally
+		{
+			reader.Close();
+		}
+		weight = newWeight;
 	}
 
 	public void MakeMove() {
@@ -33,7 +69,11 @@ public class RLAIFA {
 		List<int> currstate = rlGameState.GetCurrentState();
 
 		//First Change: MakeChoice.
-		Direction ourChoice = makeDeterministicChoice (currstate);
+		Qvalue_Direction_Pair qvalueDirectionPair = FindVOpt(currstate);
+		Direction ourChoice = qvalueDirectionPair.dir;
+
+
+
 		float randFloat = Random.Range (0.0f, 1.0f);
 		if(randFloat < epsilon){
 			List<Direction> epsilonList = new  List<Direction>();
@@ -59,55 +99,31 @@ public class RLAIFA {
 
 		manualMoveAllObjects();
 		//Get Vopt For new State
-		float Vopt = findVopt(rlGameState);
+		float Vopt = FindVOpt(rlGameState.GetCurrentState);
 
-		// if Dead -> Save the q values to a text file. (and later reload it.)
-		//Get Reward <Alywn's function>
+
 		float r = 0;
 		//+8 for forward,
 		if (ourChoice == Direction.FRONT/* && successfullymoved*/) {
-			countFront++;
 			r += 7;
-			//-9 for backward,
 		} else if (ourChoice == Direction.BACK/* && successfullymoved*/) {
-			countFront--;
 			r -= 9;
 		} else if (ourChoice == Direction.STAY) {
 			r -= 8;
 		}
 
-		/*if (!successfullymoved){
-			r -= 50;
-		}*/
-		//-1000 if dead,
 		if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().IsDead()) {
 			r -= 300;
 		}
-		//+10 every 5 streets
-		/*if (countFront == 5) {
-			r += 50;
-			countFront = 0;
-		} */
-		//-D if the road infront of the player is a river (Distance to closest log)
 
 		float eta = 0.01f;
 
+		float constant = eta (qvalueDirectionPair.qvalue - (r + Vopt));
+		weight = updateWeight (weight, addActionToCurrState (currstate, ourChoice), constant);
 
-		var key = stateActionToString(currstate,ourChoice);
-		if (!qvalues.ContainsKey (key)) {
-			qvalues [key] = 0;
-		}
-
-		//Q learning Function
-		//qvalues[key] -= eta * (qvalues[key] - (r + discountFactor * Vopt));
-		qvalues[key] = (1 - eta) * qvalues[key] + eta * (r + discountFactor * Vopt);
-		//Debug.Log (temp + " == " + qvalues [key]);
 
 		if (GameObject.FindGameObjectWithTag ("Player").GetComponent<PlayerControl> ().IsDead()) {
-			saveDictionary ();
-			saveIteration ();
-			saveHighestScore ();
-			saveScore ();
+			//Save Weight Vector at death
 
 			GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().RestartGame();
 		}
@@ -116,7 +132,7 @@ public class RLAIFA {
 	}
 
 	//Best to return direction and the q_opt value
-	private Direction makeDeterministicChoice(List<int> currstate,List<int> weight){
+	private Qvalue_Direction_Pair FindVOpt(List<int> currstate,List<int> weight){
 		//For each direction calculate Q_opt(currstate+[Direction Vector]) and pic the largest. 
 		float maxValue = 0.0f;
 		Direction bestdir = Direction.STAY;
@@ -129,7 +145,17 @@ public class RLAIFA {
 				bestdir = dir;
 			}
 		}
-		return bestdir;
+		Qvalue_Direction_Pair returnValue = new Qvalue_Direction_Pair();
+		returnValue.dir = bestdir;
+		returnValue.qvalue = maxValue;
+		return returnValue;
+	}
+
+	private List<int> updateWeight (List<int> wieght, List<int> state,float constant){
+		for (int i = 0; i < state.Count; i++){
+			weight[i] *= weight[i] - (constant*state[i]);
+		}
+		return state;
 	}
 
 	private float linearCombination(List<int> weight, List<int> state){
