@@ -101,6 +101,66 @@ public class RLGameState
         return state;
     }
 
+    public List<int> GetCurrentFAState()
+    {
+        var gameState = GameObject.FindObjectOfType<GameState>().GetComponent<GameState>();
+        List<int> state = new List<int>();
+
+        // 8 fucking loop times
+        int[] grass = { 0, 0, 0 };
+        int[] water = { 0, 0, 0 };
+        int[] road = { 0, 0, 0 };
+        int[] left = { 0, 0, 0 };
+        int[] notMoving = { 0, 0, 0 };
+        int[] right = { 0, 0, 0 };
+
+        for (int i = 0; i < 3; i++)
+        {
+            int j = (i == 1) ? 2 : 3;
+            for (int z = 0; z < j; z++)
+            {
+                Collider playerCollider = gameState.GetPlayer();
+                // move up if 1st row, dun mov if 2nd and move down if 3rd (will move also ltr on in the below function)
+                if (i == 0) movePlayer(Direction.FRONT, playerCollider.transform, true);
+                if (i == 2) movePlayer(Direction.BACK, playerCollider.transform, true);
+                // move left right depending
+                if (z == 0) movePlayer(Direction.LEFT, playerCollider.transform, true);
+                if (z == j - 1) movePlayer(Direction.RIGHT, playerCollider.transform, true);
+
+                //get the state
+                List<int> playerState = gameState.getPlayerStatusInRealWorld(playerCollider);
+                state.Add(playerState[0]);
+
+                var floorType = playerState[1];
+                if (floorType == 0)
+                    grass[i] = 1;
+                else if (floorType == 1)
+                    road[i] = 1;
+                else if (floorType == 2)
+                    water[i] = 1;
+
+                var dir = playerState[2];
+                if (dir == -1)
+                    left[i] = 1;
+                else if (dir == 0)
+                    notMoving[i] = 1;
+                else if (dir == 1)
+                    right[i] = 1;
+
+                if (playerCollider != null) GameObject.Destroy(playerCollider.gameObject);
+            }
+        }
+
+        state.AddRange(grass);
+        state.AddRange(water);
+        state.AddRange(road);
+        state.AddRange(left);
+        state.AddRange(notMoving);
+        state.AddRange(right);
+
+        return state;
+    }
+
 	void movePlayer(Direction dir, Transform trans = null, bool oride = false)
     {
         switch (dir)
