@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CustomDefinitions;
+using System.IO;
 
 public class GameTreeAI {
 
@@ -16,15 +17,184 @@ public class GameTreeAI {
     private float AIMoveInterval;
     private int depthSetting;
 
+
+	/*******************************************************************/
+					// RL + Gametree
+	//Test saving the weights!
+	private List<float> weight = new List<float> ();
+	//Tested and working
+	private void saveWeight(){
+		StreamWriter anotherNamedWriter = new StreamWriter("Assets/Resources/weight.txt");
+		string weightString = "";
+		for (int i = 0; i < weight.Count; i++) {
+			if (i == weight.Count - 1) {
+				weightString += weight[i];
+			} else {
+				weightString +=  weight[i] + "|";
+			}
+		}
+		//		Debug.Log ("OVER HERE: WEIGHT STRING" + weightString);
+		anotherNamedWriter.Write(weightString);
+		anotherNamedWriter.Close();
+	}
+
+
+	//Tested and working
+	private void readWeight(){
+		StreamReader reader = new StreamReader("Assets/Resources/weight.txt");
+		List<float> newWeight = new List<float> ();
+		try
+		{
+			do
+			{
+				string line = reader.ReadLine();
+				string[] splitString = line.Split('|');
+				foreach (var stringValue in splitString){
+					//					Debug.Log(stringValue);
+					float value = float.Parse(stringValue);
+					newWeight.Add(value);
+				}
+
+			}
+			while (reader.Peek() != -1);
+		}
+		catch (System.Exception e)
+		{
+			Debug.Log ("Error inside read score!" + e);
+		}
+		finally
+		{
+			reader.Close();
+		}
+		weight = newWeight;
+	}
+
+	public class Qvalue_Direction_Pair {
+		public Direction dir;
+		public float qvalue;
+	}
+
+	public Qvalue_Direction_Pair FindVOpt(List<int> currstate,List<float> weight){
+		//For each direction calculate Q_opt(currstate+[Direction Vector]) and pic the largest. 
+		float maxValue = -Mathf.Infinity;
+		Direction bestdir = Direction.STAY;
+		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
+			List<int> tempstate = copyState(currstate); //Supposed to Copy state
+			tempstate = addActionToCurrState(tempstate,dir);
+
+			float Q_opt = linearCombination (weight,tempstate);
+			if (Q_opt > maxValue) {
+				maxValue = Q_opt;
+				bestdir = dir;
+			}
+
+		}
+		Qvalue_Direction_Pair returnValue = new Qvalue_Direction_Pair();
+		returnValue.dir = bestdir;
+		returnValue.qvalue = maxValue;
+		return returnValue;
+	}
+
+	//Works
+	public List<int> copyState(List<int> currstate){
+		List<int> temp = new List<int> ();
+		foreach (var i in currstate) {
+			temp.Add (i);
+		}	
+		return temp;
+	}
+
+	//Test (Seems to be works. Note that the constant is eta*(target-prediction))
+	public List<float> updateWeight (List<float> weight, List<int> state,float constant){
+		//		Debug.Log ("Debug.log sesh at update weight " + constant);
+		for (int i = 0; i < state.Count; i++){
+			var value = weight [i] - (constant * state [i]);
+			//			Debug.Log ("W: " + weight [i] + " " + "C: " + constant + "  S: " + state [i] + " V: " + value);
+			weight[i] = weight[i] - (constant*state[i]); 
+
+		}
+		return weight;
+	}
+
+	//Test (Now works)
+	public float linearCombination(List<float> weight, List<int> state){
+		float linearCombValue = 0.0f;
+		for (int i = 0; i < state.Count; i++){
+			var j = weight [i] * state [i];
+			//			Debug.Log ("One line " + weight[i] + " " + state[i] + " their value " +  j );
+			linearCombValue += weight[i] * state[i];
+		}
+		return linearCombValue;
+	}
+
+	//Works
+	public List<int> addActionToCurrState(List<int> state, Direction action){
+		switch (action) {
+		case (Direction.LEFT):
+			state.Add (1);
+			state.Add (0);
+			state.Add (0);
+			state.Add (0);
+			state.Add (0);
+			break;
+		case (Direction.RIGHT):
+			state.Add (0);
+			state.Add (1);
+			state.Add (0);
+			state.Add (0);
+			state.Add (0);
+			break;
+		case (Direction.FRONT):
+			state.Add (0);
+			state.Add (0);
+			state.Add (1);
+			state.Add (0);
+			state.Add (0);
+			break;
+
+		case (Direction.BACK):
+			state.Add (0);
+			state.Add (0);
+			state.Add (0);
+			state.Add (1);
+			state.Add (0);
+			break;
+		case (Direction.STAY):
+			state.Add (0);
+			state.Add (0);
+			state.Add (0);
+			state.Add (0);
+			state.Add (1);
+			break;
+		}
+		return state;
+	}
+
+
+
+						// RL + Gametree
+	/*******************************************************************/
+
+
+
+
     public GameTreeAI(GameState gameState, int depthSetting, float AIMoveInterval)
     {
         this.gameState = gameState;
         this.depthSetting = depthSetting;
         this.AIMoveInterval = AIMoveInterval;
+		readWeight ();
     }
 
     public void FindBestMove()
     {
+		RLGameState rlGameState = new RLGameState();
+		List<int> currstate = rlGameState.GetCurrentFAState();
+
+
+		Qvalue_Direction_Pair qvalueDirectionPair = FindVOpt(currstate,weight);
+
+
         // initialization for the colliders
         playerCollider = gameState.GetPlayer();
         carColliders = gameState.GetCarColliders(playerCollider, lookRadius);
@@ -33,15 +203,78 @@ public class GameTreeAI {
         var depth = depthSetting;
         var bestMove = recurseFunction(0, depth, playerCollider.transform.position, true);
         var move = (Direction)System.Enum.Parse(typeof(Direction), bestMove[1]);
+
         movePlayer(move);
         GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().clip();
 
         manualMoveAllObjects();
 
+		var switchup = gameState.isPlayerDead (playerCollider, logColliders, carColliders);
+		var r = reward (move, switchup);
+
+		List<int> some = rlGameState.GetCurrentFAState();
+		Qvalue_Direction_Pair Vopt = FindVOpt(some,weight);
+		float vopt = Vopt.qvalue;
+		//state | move | reward | statedash
+		// 0,0,0,0,0,0,0,0,0,0,0,0|1|0.233| 0,0,0,0,0,0,0,0,0
+		float eta = 0.01f;
+
+		float constant = eta*(qvalueDirectionPair.qvalue - (r + vopt));
+		weight = updateWeight (weight, addActionToCurrState (currstate, move), constant);
+		saveWeight ();
+		string state = "";
+		for (int i = 0; i < currstate.Count; i++) {
+			if (i == currstate.Count - 1) {
+				state += currstate [i];
+			} else {
+				state += currstate[i] + ",";
+			}
+		}
+		state += "|";
+		state += (int)move + "";
+		state += "|";
+		state += r + "";
+		state += "|";
+
+		for (int i = 0; i < some.Count; i++) {
+			if (i == (some.Count - 1)) {
+				state += some [i];
+			} else {
+				state += some[i] + ",";
+			}
+		}
+
+		saveData (state);
         clearStates(); // after finding a best move, clear all states and refind another
 
         Moved = true;
     }
+
+	public void saveData(string data){
+		StreamWriter writer = new StreamWriter("Assets/Resources/greatData.txt", true);
+		writer.WriteLine(data);
+		writer.Close();
+	}
+
+	private int reward(Direction move,bool isDead){
+		int r = 0;
+		//+8 for forward,
+		if (move == Direction.FRONT/* && successfullymoved*/) {
+			r += 10;
+			//		}
+		} else if (move == Direction.BACK/* && successfullymoved*/) {
+			r -= 10;
+		}
+		//		} else if (ourChoice == Direction.STAY) {
+		////			r -= 8;
+		////		}
+
+		if (isDead) {
+			r -= 300;
+		}
+
+		return r;
+	}
 
     private void manualMoveAllObjects()
     {
