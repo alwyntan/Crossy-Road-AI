@@ -151,23 +151,6 @@ public class RLGameState
             }
         }
 
-        // extra two states for left left and right right on current row. (9th and 10th index)
-        //left left
-        Collider leftleftCollider = gameState.GetPlayer();
-        movePlayer(Direction.LEFT, leftleftCollider.transform, true);
-        movePlayer(Direction.LEFT, leftleftCollider.transform, true);
-        List<int> leftleftState = gameState.getPlayerStatusInRealWorld(leftleftCollider);
-        state.Add(leftleftState[0]);
-        if (leftleftCollider != null) GameObject.Destroy(leftleftCollider.gameObject);
-
-        //right right
-        Collider rightrightCollider = gameState.GetPlayer();
-        movePlayer(Direction.RIGHT, rightrightCollider.transform, true);
-        movePlayer(Direction.RIGHT, rightrightCollider.transform, true);
-        List<int> rightrightState = gameState.getPlayerStatusInRealWorld(rightrightCollider);
-        state.Add(rightrightState[0]);
-        if (rightrightCollider != null) GameObject.Destroy(rightrightCollider.gameObject);
-
         state.AddRange(grass);
         state.AddRange(water);
         state.AddRange(road);

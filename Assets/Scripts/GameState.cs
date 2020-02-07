@@ -8,8 +8,6 @@ public class GameState : MonoBehaviour
     private Settings settings;
     private float horizBounds;
 
-
-
     public GameObject testPlayer;
     public GameObject testLog;
     public GameObject testCar;

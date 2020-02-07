@@ -11,7 +11,7 @@ public class RLAIFA {
 
 	private float discountFactor = 1;
 
-	private float epsilon = 0.0f;
+	private float epsilon = 0.3f;
 
 
 	private List<float> weight = new List<float> ();
@@ -21,7 +21,7 @@ public class RLAIFA {
 		readWeight ();
 	}
 
-	public class Qvalue_Direction_Pair {
+	private class Qvalue_Direction_Pair {
 		public Direction dir;
 		public float qvalue;
 	}
@@ -101,7 +101,6 @@ public class RLAIFA {
 
 		float randFloat = Random.Range (0.0f, 1.0f);
 		if(randFloat < epsilon){
-			Debug.Log ("E");
 			List<Direction> epsilonList = new  List<Direction>();
 			if(currstate[1] == 0){
 				epsilonList.Add (Direction.FRONT);
@@ -131,29 +130,20 @@ public class RLAIFA {
 		float r = 0;
 		//+8 for forward,
 		if (ourChoice == Direction.FRONT/* && successfullymoved*/) {
-			r += 10;
-//		}
+			r += 7;
 		} else if (ourChoice == Direction.BACK/* && successfullymoved*/) {
-			r -= 10;
+			r -= 9;
+		} else if (ourChoice == Direction.STAY) {
+			r -= 8;
 		}
-//		} else if (ourChoice == Direction.STAY) {
-////			r -= 8;
-////		}
 
 		if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>().IsDead()) {
 			r -= 300;
 		}
 
-
-
 		float eta = 0.01f;
 
 		float constant = eta*(qvalueDirectionPair.qvalue - (r + vopt));
-		if (ourChoice == Direction.BACK ||ourChoice == Direction.FRONT /* && successfullymoved*/) {
-			Debug.Log (ourChoice);
-			Debug.Log (r);
-			Debug.Log (constant);
-		}
 		weight = updateWeight (weight, addActionToCurrState (currstate, ourChoice), constant);
 //		var weightstring = "";
 //		foreach (var dickhead in weight) {
@@ -172,30 +162,49 @@ public class RLAIFA {
 	}
 
 	//Best to return direction and the q_opt value
-	public Qvalue_Direction_Pair FindVOpt(List<int> currstate,List<float> weight){
+	private Qvalue_Direction_Pair FindVOpt(List<int> currstate,List<float> weight){
 		//For each direction calculate Q_opt(currstate+[Direction Vector]) and pic the largest. 
-		float maxValue = -Mathf.Infinity;
+		float maxValue = 0.0f;
 		Direction bestdir = Direction.STAY;
 		foreach (Direction dir in System.Enum.GetValues(typeof(Direction))) {
+//			Debug.Log("Here lies the curr state");
+//			string currstateString = "";
+//			foreach (var x in currstate) {
+//				currstateString += "" + x;
+//			}
+//			Debug.Log(currstateString);
+
 			List<int> tempstate = copyState(currstate); //Supposed to Copy state
 			tempstate = addActionToCurrState(tempstate,dir);
+
+//			Debug.Log("Here lies the second curr state");
+//			string currRound2stateString = "";
+//			foreach (var x in currstate) {
+//				currRound2stateString += "" + x;
+//			}
+//			Debug.Log(currRound2stateString);
+
+//			Debug.Log("Here lies the temp state");
+//			string tempString = "";
+//			foreach (var x in tempstate) {
+//				tempString += "" + x;
+//			}
+//			Debug.Log(tempString);
 
 			float Q_opt = linearCombination (weight,tempstate);
 			if (Q_opt > maxValue) {
 				maxValue = Q_opt;
 				bestdir = dir;
 			}
-
 		}
 		Qvalue_Direction_Pair returnValue = new Qvalue_Direction_Pair();
 		returnValue.dir = bestdir;
 		returnValue.qvalue = maxValue;
-		Debug.Log (bestdir);
 		return returnValue;
 	}
 
 	//Works
-	public List<int> copyState(List<int> currstate){
+	private List<int> copyState(List<int> currstate){
 		List<int> temp = new List<int> ();
 		foreach (var i in currstate) {
 			temp.Add (i);
@@ -204,7 +213,7 @@ public class RLAIFA {
 	}
 
 	//Test (Seems to be works. Note that the constant is eta*(target-prediction))
-	public List<float> updateWeight (List<float> weight, List<int> state,float constant){
+	private List<float> updateWeight (List<float> weight, List<int> state,float constant){
 //		Debug.Log ("Debug.log sesh at update weight " + constant);
 		for (int i = 0; i < state.Count; i++){
 			var value = weight [i] - (constant * state [i]);
@@ -216,7 +225,7 @@ public class RLAIFA {
 	}
 
 	//Test (Now works)
-	public float linearCombination(List<float> weight, List<int> state){
+	private float linearCombination(List<float> weight, List<int> state){
 		float linearCombValue = 0.0f;
 		for (int i = 0; i < state.Count; i++){
 			var j = weight [i] * state [i];
@@ -227,7 +236,7 @@ public class RLAIFA {
 	}
 
 	//Works
-	public List<int> addActionToCurrState(List<int> state, Direction action){
+	private List<int> addActionToCurrState(List<int> state, Direction action){
 		switch (action) {
 		case (Direction.LEFT):
 			state.Add (1);
